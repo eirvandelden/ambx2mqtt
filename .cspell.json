@@ -1,0 +1,39 @@
+{
+  "version": "0.2",
+  "language": "en",
+  "words": [
+    "ambx",
+    "Ambx",
+    "ambx2mqtt",
+    "libambx",
+    "libusb",
+    "wallwasher",
+    "WWLEFT",
+    "WWCENTER",
+    "WWRIGHT",
+    "mqtt",
+    "ccutrer",
+    "homeassistant",
+    "Zigbee",
+    "launchd",
+    "launchctl",
+    "systemd",
+    "onepassword",
+    "eirvandelden",
+    "etienne",
+    "vandelden",
+    "ENXIO",
+    "autorun",
+    "minitest",
+    "rubocop",
+    "bundler",
+    "Gemfile",
+    "Rakefile"
+  ],
+  "ignorePaths": [
+    ".git",
+    ".worktrees",
+    "tmp",
+    "vendor"
+  ]
+}

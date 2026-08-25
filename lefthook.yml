@@ -1,0 +1,8 @@
+extends:
+  - "${HOME}/Developer/dotfiles/lefthook.yml"
+
+# Brakeman scans Rails applications. This is a headless daemon with no web
+# surface, so there is nothing for it to look at.
+pre-push:
+  exclude_tags:
+    - rails
