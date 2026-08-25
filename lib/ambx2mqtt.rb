@@ -1,5 +1,6 @@
 require "json"
 require "pathname"
+require "time"
 
 module Ambx2mqtt
   NAME = "ambx2mqtt".freeze
@@ -8,6 +9,10 @@ module Ambx2mqtt
   # The words Home Assistant uses for a light that is lit or dark.
   ON = "ON".freeze
   OFF = "OFF".freeze
+
+  # The words Home Assistant uses for a set it can and cannot reach.
+  ONLINE = "online".freeze
+  OFFLINE = "offline".freeze
 end
 
 require "ambx2mqtt/colour"

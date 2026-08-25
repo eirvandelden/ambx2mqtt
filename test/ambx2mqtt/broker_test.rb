@@ -7,7 +7,7 @@ class BrokerTest < Minitest::Test
 
     broker.report("ambx2mqtt/desk/left/state", %({"state":"ON"}))
 
-    assert_equal [ { topic: "ambx2mqtt/desk/left/state", payload: %({"state":"ON"}), retain: true } ],
+    assert_equal [ { topic: "ambx2mqtt/desk/left/state", payload: %({"state":"ON"}), retain: true, qos: 0 } ],
                  client.published
   end
 

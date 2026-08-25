@@ -9,8 +9,8 @@ class StandInMqttClient
     @arriving = arriving
   end
 
-  def publish(topic, payload, retain: false)
-    @published << { topic: topic, payload: payload, retain: retain }
+  def publish(topic, payload, retain: false, qos: 0)
+    @published << { topic: topic, payload: payload, retain: retain, qos: qos }
   end
 
   def subscribe(*topics)

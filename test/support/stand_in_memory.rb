@@ -3,6 +3,20 @@
 class StandInMemory
   def initialize(remembered = {})
     @remembered = remembered
+    @last_seen = {}
+  end
+
+  def seen(set_identity, at)
+    @last_seen[set_identity] = at
+  end
+
+  def known
+    @last_seen.dup
+  end
+
+  def forget(set_identity)
+    @remembered.delete(set_identity)
+    @last_seen.delete(set_identity)
   end
 
   def for(set_identity, lamp_name)

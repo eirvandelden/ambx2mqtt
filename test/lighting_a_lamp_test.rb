@@ -9,7 +9,8 @@ class LightingALampTest < Minitest::Test
     @broker = StandInBroker.new
 
     set = Ambx2mqtt::Set.new(identity: "desk", connection: @connection)
-    Ambx2mqtt::Daemon.new(sets: [ set ], broker: @broker, memory: StandInMemory.new).run
+    Ambx2mqtt::Daemon.new(driver: StandInDriver.new(set), broker: @broker,
+                          memory: StandInMemory.new).run
   end
 
   def test_the_daemon_listens_for_commands_for_as_long_as_it_runs
@@ -26,7 +27,7 @@ class LightingALampTest < Minitest::Test
     ask_for %({"state":"ON","brightness":255,"color":{"r":255,"g":0,"b":0}})
 
     assert_equal({ "state" => "ON", "brightness" => 255, "color" => { "r" => 255, "g" => 0, "b" => 0 } },
-                 @broker.reported(STATE_TOPIC))
+                 @broker.reported_settings(STATE_TOPIC))
   end
 
   def test_a_lamp_asked_for_a_colour_without_a_brightness_burns_at_full
@@ -45,7 +46,7 @@ class LightingALampTest < Minitest::Test
     ask_for %({"state":"ON","brightness":128,"color":{"r":255,"g":0,"b":0}})
 
     assert_equal({ "state" => "ON", "brightness" => 128, "color" => { "r" => 255, "g" => 0, "b" => 0 } },
-                 @broker.reported(STATE_TOPIC))
+                 @broker.reported_settings(STATE_TOPIC))
   end
 
   def test_turning_a_lamp_off_darkens_the_hardware
@@ -60,7 +61,7 @@ class LightingALampTest < Minitest::Test
     ask_for %({"state":"OFF"})
 
     assert_equal({ "state" => "OFF", "brightness" => 255, "color" => { "r" => 255, "g" => 0, "b" => 0 } },
-                 @broker.reported(STATE_TOPIC))
+                 @broker.reported_settings(STATE_TOPIC))
   end
 
   def test_turning_a_lamp_back_on_brings_back_the_colour_it_had

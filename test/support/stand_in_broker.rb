@@ -7,10 +7,19 @@ class StandInBroker
     @listeners = {}
     @reports = {}
     @listening = false
+    @forgotten = []
   end
 
   def announce(**description)
     @announcement = description
+  end
+
+  def forget(device_id)
+    @forgotten << device_id
+  end
+
+  def forgotten?(device_id)
+    @forgotten.include?(device_id)
   end
 
   def on_command(topic, &listener)
@@ -35,6 +44,10 @@ class StandInBroker
   end
 
   def reported(topic)
-    JSON.parse(@reports.fetch(topic) { raise "nothing was reported to #{topic}" })
+    @reports.fetch(topic) { raise "nothing was reported to #{topic}" }
+  end
+
+  def reported_settings(topic)
+    JSON.parse(reported(topic))
   end
 end
