@@ -11,6 +11,21 @@ class BrokerTest < Minitest::Test
                  client.published
   end
 
+  def test_announcing_a_set_offers_home_assistant_one_device_carrying_its_lamps
+    client = StandInMqttClient.new
+    broker = Ambx2mqtt::Broker.new(client)
+
+    broker.announce(device_id: "ambx2mqtt_desk",
+                    device: { name: "desk" },
+                    origin: { name: "ambx2mqtt" },
+                    lamps: [ { object_id: "left", name: "Left", command_topic: "ambx2mqtt/desk/left/set" } ])
+
+    assert_equal "ambx2mqtt_desk", client.announced_device[:device_id]
+    assert_equal({ name: "desk" }, client.announced_device[:device])
+    assert_equal [ "left" ], client.announced_lamps.map { |lamp| lamp[:object_id] }
+    assert_equal "Left", client.announced_lamps.first[:name]
+  end
+
   def test_listening_for_a_lamps_commands_subscribes_to_its_command_topic
     client = StandInMqttClient.new
     broker = Ambx2mqtt::Broker.new(client)
