@@ -30,7 +30,7 @@ module Ambx2mqtt
     end
 
     def state
-      { state: @on ? ON : OFF, brightness: @brightness, color: @colour.to_home_assistant }
+      { "state" => @on ? ON : OFF, "brightness" => @brightness, "color" => @colour.to_home_assistant }
     end
 
     private

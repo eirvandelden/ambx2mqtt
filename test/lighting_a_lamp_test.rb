@@ -9,7 +9,7 @@ class LightingALampTest < Minitest::Test
     @broker = StandInBroker.new
 
     set = Ambx2mqtt::Set.new(identity: "desk", connection: @connection)
-    Ambx2mqtt::Daemon.new(sets: [ set ], broker: @broker).run
+    Ambx2mqtt::Daemon.new(sets: [ set ], broker: @broker, memory: StandInMemory.new).run
   end
 
   def test_the_daemon_listens_for_commands_for_as_long_as_it_runs

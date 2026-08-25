@@ -5,7 +5,7 @@ class AppearingInHomeAssistantTest < Minitest::Test
     @broker = StandInBroker.new
     set = Ambx2mqtt::Set.new(identity: "desk", connection: StandInConnection.new)
 
-    Ambx2mqtt::Daemon.new(sets: [ set ], broker: @broker).run
+    Ambx2mqtt::Daemon.new(sets: [ set ], broker: @broker, memory: StandInMemory.new).run
   end
 
   def test_a_set_appears_in_home_assistant_as_one_device

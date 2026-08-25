@@ -1,4 +1,5 @@
 require "json"
+require "pathname"
 
 module Ambx2mqtt
   NAME = "ambx2mqtt".freeze
@@ -15,5 +16,6 @@ require "ambx2mqtt/lamp_command"
 require "ambx2mqtt/set"
 require "ambx2mqtt/topics"
 require "ambx2mqtt/announcement"
+require "ambx2mqtt/remembered_state"
 require "ambx2mqtt/broker"
 require "ambx2mqtt/daemon"
