@@ -5,7 +5,7 @@ module Ambx2mqtt
     end
 
     def to_home_assistant
-      { r: red, g: green, b: blue }
+      { "r" => red, "g" => green, "b" => blue }
     end
 
     # The hardware has no brightness of its own, so a dimmed lamp is simply a
