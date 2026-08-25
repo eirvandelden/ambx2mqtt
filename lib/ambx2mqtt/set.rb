@@ -17,8 +17,8 @@ module Ambx2mqtt
       @lamps = LAMP_ADDRESSES.map { |name, address| Lamp.new(name: name, address: address) }
     end
 
-    def show(lamp, colour)
-      lamp.show(colour)
+    def show(lamp, command)
+      lamp.asked_for(command)
       @connection.write(lamp.command_bytes)
     end
   end

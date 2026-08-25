@@ -7,6 +7,12 @@ module Ambx2mqtt
       @listeners = {}
     end
 
+    def announce(device_id:, device:, origin:, lamps:)
+      @client.publish_hass_device(device_id, device: device, origin: origin) do
+        lamps.each { |lamp| @client.publish_hass_light(lamp.fetch(:object_id), **lamp.except(:object_id)) }
+      end
+    end
+
     def on_command(topic, &listener)
       @listeners[topic] = listener
       @client.subscribe(topic)

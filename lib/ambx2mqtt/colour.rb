@@ -7,6 +7,18 @@ module Ambx2mqtt
     def to_home_assistant
       { r: red, g: green, b: blue }
     end
+
+    # The hardware has no brightness of its own, so a dimmed lamp is simply a
+    # darker colour on the wire.
+    def dimmed_to(brightness)
+      Colour.new(red: dim(red, brightness), green: dim(green, brightness), blue: dim(blue, brightness))
+    end
+
+    private
+
+    def dim(value, brightness)
+      value * brightness / FULL_BRIGHTNESS
+    end
   end
 
   Colour::BLACK = Colour.new(red: 0, green: 0, blue: 0)
