@@ -1,0 +1,4 @@
+# Audit every gem in the Gemfile for known security problems by running
+# bin/bundler-audit. Problems that do not apply here go on the ignore list.
+
+ignore: []
