@@ -9,12 +9,13 @@ module Ambx2mqtt
       "wallwasher right" => 0x4B
     }.freeze
 
-    attr_reader :identity, :lamps
+    attr_reader :identity, :name, :lamps
 
-    def initialize(identity:, connection:)
+    def initialize(identity:, connection:, name: identity)
       @identity = identity
+      @name = name
       @connection = connection
-      @lamps = LAMP_ADDRESSES.map { |name, address| Lamp.new(name: name, address: address) }
+      @lamps = LAMP_ADDRESSES.map { |lamp_name, address| Lamp.new(name: lamp_name, address: address) }
     end
 
     def show(lamp, command)

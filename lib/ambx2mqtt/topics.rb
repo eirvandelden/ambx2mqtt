@@ -1,6 +1,10 @@
 module Ambx2mqtt
   # Where one set's commands arrive and its state is reported.
   class Topics
+    def self.daemon_availability
+      "#{NAME}/availability"
+    end
+
     def initialize(identity)
       @identity = identity
     end

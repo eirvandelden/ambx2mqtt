@@ -1,0 +1,23 @@
+# Copy this to ~/.config/ambx2mqtt/config.yml and fill in your own broker.
+#
+# The password is never written here. Put an op:// reference instead and the
+# daemon reads it from 1Password at startup with the `op` command, so unlock
+# 1Password before the daemon starts. A plain password also works if you would
+# rather not use 1Password.
+
+broker:
+  host: mqtt.home.arpa
+  port: 1883
+  username: ambx2mqtt
+  password: op://Familie/MqttBroker/password
+
+# Where the daemon remembers what each lamp was last asked for. Leave this out
+# and it lives under your own state directory.
+state_file: ~/.local/state/ambx2mqtt/state.json
+
+# Optional. Give a set a name a person would recognise; the key is the set's
+# identity, which the daemon logs when it finds one. Sets left out here are
+# called by their identity.
+sets:
+  AB12CD34: Living room
+  usb-20-3: Study

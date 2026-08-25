@@ -34,6 +34,17 @@ class AppearingInHomeAssistantTest < Minitest::Test
                  announcement[:lamps].map { |lamp| lamp[:unique_id] }
   end
 
+  def test_a_set_that_has_been_given_a_name_shows_that_name_in_home_assistant
+    broker = StandInBroker.new
+    set = Ambx2mqtt::Set.new(identity: "AB12CD34", name: "Living room",
+                             connection: StandInConnection.new)
+
+    Ambx2mqtt::Daemon.new(driver: StandInDriver.new(set), broker: broker,
+                          memory: StandInMemory.new).run
+
+    assert_equal "Living room", broker.announcement[:device][:name]
+  end
+
   private
 
   def announcement

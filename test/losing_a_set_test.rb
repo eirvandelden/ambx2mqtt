@@ -26,7 +26,7 @@ class LosingASetTest < Minitest::Test
   def test_home_assistant_is_told_where_to_watch_for_a_set_going_away
     @daemon.look_around
 
-    assert_equal AVAILABILITY_TOPIC, @broker.announcement[:availability_topic]
+    assert_includes @broker.announcement[:availability], { topic: AVAILABILITY_TOPIC }
   end
 
   def test_a_set_that_is_unplugged_becomes_unavailable

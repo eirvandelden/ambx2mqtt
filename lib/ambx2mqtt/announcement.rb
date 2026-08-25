@@ -17,9 +17,10 @@ module Ambx2mqtt
     def to_home_assistant
       {
         device_id: device_id,
-        device: { identifiers: device_id, name: @set.identity, manufacturer: MANUFACTURER, model: MODEL },
+        device: { identifiers: device_id, name: @set.name, manufacturer: MANUFACTURER, model: MODEL },
         origin: { name: NAME },
-        availability_topic: @topics.availability,
+        availability: [ { topic: Topics.daemon_availability }, { topic: @topics.availability } ],
+        availability_mode: "all",
         lamps: @set.lamps.map { |lamp| lamp_component(lamp) }
       }
     end
