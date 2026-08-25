@@ -6,7 +6,8 @@ class AppearingInHomeAssistantTest < Minitest::Test
     set = Ambx2mqtt::Set.new(identity: "desk", connection: StandInConnection.new)
 
     Ambx2mqtt::Daemon.new(driver: StandInDriver.new(set), broker: @broker,
-                          memory: StandInMemory.new).run
+                          memory: StandInMemory.new,
+                          clock: StandInClock.new).run
   end
 
   def test_a_set_appears_in_home_assistant_as_one_device
@@ -40,7 +41,8 @@ class AppearingInHomeAssistantTest < Minitest::Test
                              connection: StandInConnection.new)
 
     Ambx2mqtt::Daemon.new(driver: StandInDriver.new(set), broker: broker,
-                          memory: StandInMemory.new).run
+                          memory: StandInMemory.new,
+                          clock: StandInClock.new).run
 
     assert_equal "Living room", broker.announcement[:device][:name]
   end

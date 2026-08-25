@@ -65,7 +65,8 @@ class RememberingAcrossRestartsTest < Minitest::Test
     set = Ambx2mqtt::Set.new(identity: "desk", connection: connection)
 
     Ambx2mqtt::Daemon.new(driver: StandInDriver.new(set), broker: broker,
-                          memory: Ambx2mqtt::RememberedState.new(@path)).run
+                          memory: Ambx2mqtt::RememberedState.new(@path),
+                          clock: StandInClock.new).run
     yield broker if block_given?
 
     [ connection, broker ]

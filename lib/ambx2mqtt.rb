@@ -19,6 +19,7 @@ end
 
 require "ambx2mqtt/secret"
 require "ambx2mqtt/configuration"
+require "ambx2mqtt/clock"
 require "ambx2mqtt/colour"
 require "ambx2mqtt/lamp"
 require "ambx2mqtt/lamp_command"

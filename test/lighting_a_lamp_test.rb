@@ -10,7 +10,8 @@ class LightingALampTest < Minitest::Test
 
     set = Ambx2mqtt::Set.new(identity: "desk", connection: @connection)
     Ambx2mqtt::Daemon.new(driver: StandInDriver.new(set), broker: @broker,
-                          memory: StandInMemory.new).run
+                          memory: StandInMemory.new,
+                          clock: StandInClock.new).run
   end
 
   def test_the_daemon_listens_for_commands_for_as_long_as_it_runs

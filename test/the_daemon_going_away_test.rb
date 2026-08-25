@@ -24,7 +24,8 @@ class TheDaemonGoingAwayTest < Minitest::Test
     set = Ambx2mqtt::Set.new(identity: "desk", connection: StandInConnection.new)
 
     Ambx2mqtt::Daemon.new(driver: StandInDriver.new(set), broker: broker,
-                          memory: StandInMemory.new).run
+                          memory: StandInMemory.new,
+                          clock: StandInClock.new).run
 
     assert_equal [ DAEMON_AVAILABILITY, SET_AVAILABILITY ],
                  broker.announcement[:availability].map { |watched| watched[:topic] }
@@ -36,7 +37,8 @@ class TheDaemonGoingAwayTest < Minitest::Test
     set = Ambx2mqtt::Set.new(identity: "desk", connection: StandInConnection.new)
 
     Ambx2mqtt::Daemon.new(driver: StandInDriver.new(set), broker: broker,
-                          memory: StandInMemory.new).run
+                          memory: StandInMemory.new,
+                          clock: StandInClock.new).run
 
     assert_equal DAEMON_AVAILABILITY, broker.connected_reporting_on
   end

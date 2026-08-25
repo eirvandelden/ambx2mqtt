@@ -1,4 +1,5 @@
-# Stands in for the clock, so a two-day wait takes no time at all.
+# Stands in for the clock, so a two-day wait takes no time at all and the rounds
+# happen when the test says so.
 class StandInClock
   attr_reader :now
 
@@ -8,5 +9,13 @@ class StandInClock
 
   def advance(seconds)
     @now += seconds
+  end
+
+  def every_round(&doing)
+    @doing = doing
+  end
+
+  def next_round
+    @doing.call
   end
 end
