@@ -1,10 +1,16 @@
 # Stands in for the MQTT broker. Tests hand it a command with `deliver` and read
-# back what was reported with `reported`.
+# back what was announced or reported.
 class StandInBroker
+  attr_reader :announcement
+
   def initialize
     @listeners = {}
     @reports = {}
     @listening = false
+  end
+
+  def announce(**description)
+    @announcement = description
   end
 
   def on_command(topic, &listener)
