@@ -1,6 +1,6 @@
 # Stands in for the MQTT gem's client, recording what the broker asked it to do.
 class StandInMqttClient
-  attr_reader :published, :subscribed, :announced_device, :announced_lamps
+  attr_reader :published, :subscribed, :announced_device, :announced_lamps, :will, :connected
 
   def initialize(arriving: [])
     @published = []
@@ -11,6 +11,14 @@ class StandInMqttClient
 
   def publish(topic, payload, retain: false, qos: 0)
     @published << { topic: topic, payload: payload, retain: retain, qos: qos }
+  end
+
+  def set_will(topic, payload, retain: false)
+    @will = { topic: topic, payload: payload, retain: retain }
+  end
+
+  def connect
+    @connected = true
   end
 
   def subscribe(*topics)

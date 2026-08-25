@@ -1,13 +1,17 @@
 # Stands in for the MQTT broker. Tests hand it a command with `deliver` and read
 # back what was announced or reported.
 class StandInBroker
-  attr_reader :announcement
+  attr_reader :announcement, :connected_reporting_on
 
   def initialize
     @listeners = {}
     @reports = {}
     @listening = false
     @forgotten = []
+  end
+
+  def connect(reporting_availability_on:)
+    @connected_reporting_on = reporting_availability_on
   end
 
   def announce(**description)

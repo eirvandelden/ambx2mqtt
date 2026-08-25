@@ -9,6 +9,14 @@ module Ambx2mqtt
       @listeners = {}
     end
 
+    # The last word is left with the broker before connecting, so a daemon that
+    # dies is still seen to have gone.
+    def connect(reporting_availability_on:)
+      @client.set_will(reporting_availability_on, OFFLINE, retain: true)
+      @client.connect
+      report(reporting_availability_on, ONLINE)
+    end
+
     def announce(device_id:, device:, origin:, lamps:)
       @client.publish_hass_device(device_id, device: device, origin: origin) do
         lamps.each { |lamp| @client.publish_hass_light(lamp.fetch(:object_id), **lamp.except(:object_id)) }

@@ -15,6 +15,7 @@ module Ambx2mqtt
     end
 
     def run
+      @broker.connect(reporting_availability_on: Topics.daemon_availability)
       look_around
       @broker.listen
     end

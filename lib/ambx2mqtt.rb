@@ -1,6 +1,8 @@
 require "json"
 require "pathname"
 require "time"
+require "open3"
+require "yaml"
 
 module Ambx2mqtt
   NAME = "ambx2mqtt".freeze
@@ -15,6 +17,8 @@ module Ambx2mqtt
   OFFLINE = "offline".freeze
 end
 
+require "ambx2mqtt/secret"
+require "ambx2mqtt/configuration"
 require "ambx2mqtt/colour"
 require "ambx2mqtt/lamp"
 require "ambx2mqtt/lamp_command"
