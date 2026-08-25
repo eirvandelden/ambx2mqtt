@@ -30,7 +30,7 @@ class RememberingAcrossRestartsTest < Minitest::Test
     _, broker = start_the_daemon
 
     assert_equal({ "state" => "ON", "brightness" => 128, "color" => { "r" => 255, "g" => 0, "b" => 0 } },
-                 broker.reported(STATE_TOPIC))
+                 broker.reported_settings(STATE_TOPIC))
   end
 
   def test_a_lamp_nobody_has_touched_yet_is_left_alone
@@ -64,7 +64,7 @@ class RememberingAcrossRestartsTest < Minitest::Test
     broker = StandInBroker.new
     set = Ambx2mqtt::Set.new(identity: "desk", connection: connection)
 
-    Ambx2mqtt::Daemon.new(sets: [ set ], broker: broker,
+    Ambx2mqtt::Daemon.new(driver: StandInDriver.new(set), broker: broker,
                           memory: Ambx2mqtt::RememberedState.new(@path)).run
     yield broker if block_given?
 

@@ -5,6 +5,10 @@ module Ambx2mqtt
       @identity = identity
     end
 
+    def availability
+      "#{NAME}/#{@identity}/availability"
+    end
+
     def command_for(lamp)
       "#{for_lamp(lamp)}/set"
     end

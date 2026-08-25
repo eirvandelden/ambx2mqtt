@@ -5,6 +5,10 @@ module Ambx2mqtt
     MODEL = "amBX".freeze
     COLOUR_MODE = "rgb".freeze
 
+    def self.device_id(identity)
+      "#{NAME}_#{identity}"
+    end
+
     def initialize(set)
       @set = set
       @topics = Topics.new(set.identity)
@@ -15,6 +19,7 @@ module Ambx2mqtt
         device_id: device_id,
         device: { identifiers: device_id, name: @set.identity, manufacturer: MANUFACTURER, model: MODEL },
         origin: { name: NAME },
+        availability_topic: @topics.availability,
         lamps: @set.lamps.map { |lamp| lamp_component(lamp) }
       }
     end
@@ -22,7 +27,7 @@ module Ambx2mqtt
     private
 
     def device_id
-      "#{NAME}_#{@set.identity}"
+      self.class.device_id(@set.identity)
     end
 
     def lamp_component(lamp)
