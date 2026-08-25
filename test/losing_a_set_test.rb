@@ -78,6 +78,14 @@ class LosingASetTest < Minitest::Test
     assert_equal [ 0xA1, 0x0B, 0x03, 255, 0, 0 ], @connection.commands.last
   end
 
+  def test_a_running_daemon_keeps_looking_around_so_a_set_that_goes_is_noticed
+    @daemon.run
+    @driver.unplug("desk")
+    @clock.next_round
+
+    assert_equal "offline", @broker.reported(AVAILABILITY_TOPIC)
+  end
+
   private
 
   def lose_the_set_for(seconds)

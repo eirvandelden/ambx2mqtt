@@ -5,22 +5,30 @@ module Ambx2mqtt
   class Daemon
     GRACE_PERIOD = 48 * 60 * 60
 
-    def initialize(driver:, broker:, memory:, clock: Time)
+    def initialize(driver:, broker:, memory:, clock: Clock.new)
       @driver = driver
       @broker = broker
       @memory = memory
       @clock = clock
       @attached = {}
       @topics = {}
+      @one_at_a_time = Mutex.new
     end
 
     def run
       @broker.connect(reporting_availability_on: Topics.daemon_availability)
       look_around
+      @clock.every_round { look_around }
       @broker.listen
     end
 
     def look_around
+      @one_at_a_time.synchronize { look_around_now }
+    end
+
+    private
+
+    def look_around_now
       attached = @driver.attached_sets
 
       attached.each do |set|
@@ -31,8 +39,6 @@ module Ambx2mqtt
       depart(attached.map(&:identity))
       forget_the_long_gone
     end
-
-    private
 
     def arrive(set)
       @attached[set.identity] = set
@@ -69,8 +75,10 @@ module Ambx2mqtt
     def take_commands_for(set)
       set.lamps.each do |lamp|
         @broker.on_command(topics_for(set.identity).command_for(lamp)) do |payload|
-          show(set, lamp, LampCommand.parse(payload))
-          @memory.remember(set.identity, lamp.topic_name, lamp.state)
+          @one_at_a_time.synchronize do
+            show(set, lamp, LampCommand.parse(payload))
+            @memory.remember(set.identity, lamp.topic_name, lamp.state)
+          end
         end
       end
     end
