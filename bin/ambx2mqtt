@@ -28,8 +28,4 @@ client = MQTT::Client.new(
   client_id: Ambx2mqtt::NAME
 )
 
-Ambx2mqtt::Daemon.new(
-  driver: Ambx2mqtt::AmbxDriver.new(Ambx, names: configuration),
-  broker: Ambx2mqtt::Broker.new(client),
-  memory: Ambx2mqtt::RememberedState.new(configuration.state_file)
-).run
+Ambx2mqtt::Daemon.looking_after(configuration, controllers: Ambx, client: client).run

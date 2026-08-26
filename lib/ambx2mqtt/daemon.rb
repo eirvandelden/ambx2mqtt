@@ -5,6 +5,15 @@ module Ambx2mqtt
   class Daemon
     GRACE_PERIOD = 48 * 60 * 60
 
+    # Everything the daemon needs, built from what it was told: the only place
+    # that knows how the parts fit together, so the entrypoint cannot wire them
+    # up wrongly on its own.
+    def self.looking_after(configuration, controllers:, client:)
+      new(driver: AmbxDriver.new(controllers, configuration: configuration),
+          broker: Broker.new(client),
+          memory: RememberedState.new(configuration.state_file))
+    end
+
     def initialize(driver:, broker:, memory:, clock: Clock.new)
       @driver = driver
       @broker = broker
