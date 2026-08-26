@@ -73,10 +73,26 @@ Two further needs:
    - sleep and wake the Mac: sets come back
 8. **Friendly names** — fill in the real identities once they have been observed.
 
-## Open questions for the hardware walkthrough
+## Answered by real hardware, 26 August 2026
 
-- Does each box expose a non-empty, unique, replug-stable serial? If not, the port-path identity
-  changes whenever the box moves to a different socket, and the friendly-name map has to be
-  rewritten when it does.
+Two sets attached, Philips `0x0471:0x083F`, at port paths `[1, 2, 2]` and `[1, 2, 3]`.
+
+**Neither box has a serial number.** Both report `iSerialNumber` descriptor index `0`, meaning no
+serial descriptor at all. libusb's Ruby binding returns the placeholder string `"?"` for that,
+which is *non-empty*.
+
+This matters for `libambx`. Its design says to use `serial:<serial_number>` "when the descriptor
+reports a non-empty serial number" — and `"?"` passes that test, so both boxes would be given the
+identity `serial:?` and collide into one device. The rule wants to be `iSerialNumber != 0` rather
+than a non-empty check, so real hardware falls through to the port path.
+
+The daemon therefore identifies these boxes as `port_1_2_2` and `port_1_2_3`. A port path is the
+chain of physical ports, so it survives a replug into the same socket and a reboot. Moving a box
+to a different socket, or putting a hub in between, gives it a new identity: the old device goes
+unavailable and is dropped after two days, a new unnamed device appears, remembered colours do not
+follow, and anything referring to the old entities has to be repointed.
+
+## Still open
+
 - How long can the rounds be? Thirty seconds is a guess; a longer round means a slower unplug is
   noticed, a shorter one means more USB polling.
