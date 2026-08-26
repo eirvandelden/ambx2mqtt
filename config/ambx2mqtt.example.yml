@@ -24,7 +24,7 @@ log_level: info
 # Optional. Give a set a name a person would recognise. The key is the set's
 # identity, which the daemon logs when it finds one: serial_ and the box's
 # serial number, or port_ and where it is plugged in when it has no serial.
-# A set left out here is called by its identity.
+# A set left out here is simply called amBX, numbered from the second onwards.
 #
 # A set with no serial is known by where it is plugged in, so moving it to a
 # different socket gives it a new identity and it needs naming again.
