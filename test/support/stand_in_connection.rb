@@ -7,8 +7,11 @@ class StandInConnection
     @commands = []
   end
 
+  # Truthy says the bytes reached the box, as the driver contract asks.
   def write(bytes)
     @commands << bytes
+
+    true
   end
 end
 
@@ -16,6 +19,13 @@ end
 class UnpluggedConnection
   def write(_bytes)
     false
+  end
+end
+
+# A driver that says nothing at all about the write: falsy, so the box is gone.
+class SilentConnection
+  def write(_bytes)
+    nil
   end
 end
 

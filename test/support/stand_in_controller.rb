@@ -18,6 +18,7 @@ class StandInController
     @opens
   end
 
+  # Truthy says the bytes reached the box, as the driver contract asks.
   def write(bytes)
     @written << bytes
 

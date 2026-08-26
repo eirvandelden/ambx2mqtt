@@ -31,6 +31,18 @@ class SetTest < Minitest::Test
     assert_equal [ 0xA1, 0x2B, 0x03, 255, 0, 0 ], connection.commands.last
   end
 
+  def test_a_set_passes_on_that_the_bytes_reached_the_box
+    set = Ambx2mqtt::Set.new(identity: "desk", connection: StandInConnection.new)
+
+    assert set.show(lamp_called("left", set), RED), "the set kept to itself that the command landed"
+  end
+
+  def test_a_set_whose_driver_says_nothing_about_the_write_treats_the_box_as_gone
+    set = Ambx2mqtt::Set.new(identity: "desk", connection: SilentConnection.new)
+
+    refute set.show(lamp_called("left", set), RED), "a write nobody vouched for was taken as landed"
+  end
+
   private
 
   def lamp_called(name, set)

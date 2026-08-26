@@ -41,12 +41,17 @@ already written against this shape, so nothing but that one class should have to
 | --- | --- |
 | `attached_sets` | one object per physical amBX box attached right now |
 | each of those: `identity` | a name that is the same after a replug — the USB serial, or the port path when there is no serial — safe to put in an MQTT topic |
-| each of those: `write(bytes)` | those six bytes reaching **that box and no other** |
+| each of those: `write(bytes)` | those six bytes reaching **that box and no other**, and something truthy back to say they got there |
 
 Two further needs:
 
+- What `write` answers is how a set says whether it is still there: anything truthy means the bytes
+  reached the box, and anything falsy — `false` or `nil` — means the box is gone and the set is
+  reported unavailable. A driver that returns `nil` on a write that worked would put every healthy
+  set out of reach, so it must return something truthy.
 - A `write` to a box that has just been unplugged must fail without taking the process down and
-  without disturbing the other boxes. The daemon notices the loss on its next round.
+  without disturbing the other boxes: falsy or a raise, either will do. The daemon notices the loss
+  on its next round.
 - Nothing is ever read back from the hardware. The daemon only ever reports what it asked for.
 
 ## What remains, in order
