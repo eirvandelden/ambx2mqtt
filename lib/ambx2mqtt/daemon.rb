@@ -11,6 +11,7 @@ module Ambx2mqtt
       @memory = memory
       @clock = clock
       @attached = {}
+      @reported_away = []
       @topics = {}
       @one_at_a_time = Mutex.new
     end
@@ -42,6 +43,7 @@ module Ambx2mqtt
 
     def arrive(set)
       @attached[set.identity] = set
+      @reported_away.delete(set.identity)
       @broker.announce(**Announcement.new(set).to_home_assistant)
       put_back(set)
       take_commands_for(set)
@@ -49,12 +51,20 @@ module Ambx2mqtt
       Ambx2mqtt.logger.info("found the set #{set.identity}, calling it #{set.name.inspect}")
     end
 
+    # Every set the daemon has ever seen, not only those it saw this run: one
+    # that was already away at startup still has to be reported away, or Home
+    # Assistant goes on showing whatever it was told last time.
     def depart(still_attached)
-      (@attached.keys - still_attached).each do |identity|
-        @broker.report(topics_for(identity).availability, OFFLINE)
-        @attached.delete(identity)
-        Ambx2mqtt.logger.info("lost the set #{identity}")
-      end
+      ((@attached.keys | @memory.known.keys) - still_attached).each { |identity| lose(identity) }
+    end
+
+    def lose(identity)
+      return if @reported_away.include?(identity)
+
+      @broker.report(topics_for(identity).availability, OFFLINE)
+      @attached.delete(identity)
+      @reported_away << identity
+      Ambx2mqtt.logger.info("lost the set #{identity}")
     end
 
     def forget_the_long_gone
@@ -86,9 +96,16 @@ module Ambx2mqtt
       end
     end
 
+    # A set can be unplugged between one command and the next. However the driver
+    # says so, it must not take the daemon down: the set is simply lost, and the
+    # others carry on.
     def show(set, lamp, command)
-      set.show(lamp, command)
+      reached = set.show(lamp, command)
       @broker.report(topics_for(set.identity).state_for(lamp), lamp.state.to_json)
+      lose(set.identity) unless reached
+    rescue StandardError => error
+      Ambx2mqtt.logger.warn("could not reach the set #{set.identity}: #{error.message}")
+      lose(set.identity)
     end
 
     def topics_for(identity)

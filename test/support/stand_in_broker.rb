@@ -52,6 +52,14 @@ class StandInBroker
     listener.call(payload)
   end
 
+  def forget_what_was_reported(topic)
+    @reports.delete(topic)
+  end
+
+  def reported?(topic)
+    @reports.key?(topic)
+  end
+
   def reported(topic)
     @reports.fetch(topic) { raise "nothing was reported to #{topic}" }
   end

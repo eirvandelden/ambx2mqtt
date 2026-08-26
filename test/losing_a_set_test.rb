@@ -86,7 +86,49 @@ class LosingASetTest < Minitest::Test
     assert_equal "offline", @broker.reported(AVAILABILITY_TOPIC)
   end
 
+  def test_a_set_unplugged_midway_through_a_command_does_not_take_the_daemon_down
+    daemon = daemon_over(Ambx2mqtt::Set.new(identity: "desk", connection: VanishedConnection.new))
+    daemon.look_around
+
+    @broker.deliver("ambx2mqtt/desk/left/set", %({"state":"ON","color":{"r":255,"g":0,"b":0}}))
+
+    assert_equal "offline", @broker.reported("ambx2mqtt/desk/availability")
+  end
+
+  def test_a_set_that_says_the_command_did_not_land_is_marked_unavailable
+    daemon = daemon_over(Ambx2mqtt::Set.new(identity: "desk", connection: UnpluggedConnection.new))
+    daemon.look_around
+
+    @broker.deliver("ambx2mqtt/desk/left/set", %({"state":"ON","color":{"r":255,"g":0,"b":0}}))
+
+    assert_equal "offline", @broker.reported("ambx2mqtt/desk/availability")
+  end
+
+  def test_a_set_that_was_already_away_when_the_daemon_started_is_reported_away
+    @memory.seen("attic", @clock.now)
+
+    @daemon.look_around
+
+    assert_equal "offline", @broker.reported("ambx2mqtt/attic/availability")
+  end
+
+  def test_a_set_that_stays_away_is_not_announced_as_away_over_and_over
+    @memory.seen("attic", @clock.now)
+    @daemon.look_around
+    @broker.forget_what_was_reported("ambx2mqtt/attic/availability")
+
+    @daemon.look_around
+
+    refute @broker.reported?("ambx2mqtt/attic/availability"),
+           "the daemon keeps repeating that a set it lost long ago is away"
+  end
+
   private
+
+  def daemon_over(set)
+    Ambx2mqtt::Daemon.new(driver: StandInDriver.new(set), broker: @broker,
+                          memory: StandInMemory.new, clock: @clock)
+  end
 
   def lose_the_set_for(seconds)
     @daemon.look_around
