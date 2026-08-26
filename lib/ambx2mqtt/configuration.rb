@@ -4,6 +4,7 @@ module Ambx2mqtt
   class Configuration
     USUAL_BROKER_PORT = 1883
     STATE_FILE_AT_HOME = "~/.local/state/ambx2mqtt/state.json".freeze
+    USUAL_LOG_LEVEL = :info
 
     def self.read(path)
       new(YAML.safe_load_file(path) || {})
@@ -31,6 +32,10 @@ module Ambx2mqtt
 
     def state_file
       File.expand_path(@said.fetch("state_file", STATE_FILE_AT_HOME))
+    end
+
+    def log_level
+      @said.fetch("log_level", USUAL_LOG_LEVEL).to_sym
     end
 
     def name_for(set_identity)

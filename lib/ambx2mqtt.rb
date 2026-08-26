@@ -2,6 +2,7 @@ require "json"
 require "pathname"
 require "time"
 require "open3"
+require "logger"
 require "yaml"
 
 module Ambx2mqtt
@@ -15,6 +16,14 @@ module Ambx2mqtt
   # The words Home Assistant uses for a set it can and cannot reach.
   ONLINE = "online".freeze
   OFFLINE = "offline".freeze
+
+  class << self
+    attr_writer :logger
+
+    def logger
+      @logger ||= Logger.new($stdout)
+    end
+  end
 end
 
 require "ambx2mqtt/secret"

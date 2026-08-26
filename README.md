@@ -23,17 +23,6 @@ Each lamp takes a colour, a brightness and on/off, and remembers what it was las
 The hardware cannot be read back, so what Home Assistant shows is always *what was last asked
 for*, never a reading from the lamp itself.
 
-## Where this has got to
-
-Everything that does not touch USB is built: the Home Assistant device and its five lamps, colour,
-brightness, on/off, remembering across restarts, availability, the two-day forgetting, and reading
-the broker password from 1Password.
-
-What is left needs the `libambx` driver, which is being written separately — the daemon still has
-no way to find a real set, so `bin/ambx2mqtt` and the service files are not here yet.
-`docs/handoffs/2026-08-25-ambx2mqtt-what-remains.md` says exactly what remains and what the daemon
-needs from the driver.
-
 ## Running it
 
 ```
@@ -44,7 +33,11 @@ $EDITOR ~/.config/ambx2mqtt/config.yml
 bin/ambx2mqtt --config ~/.config/ambx2mqtt/config.yml
 ```
 
-Installing it as a background service is described in `docs/installing.md`.
+`docs/installing.md` has the whole thing, including keeping it running as a background service on
+macOS and Linux.
+
+The sets are reached through the `libambx` gem, which is not published yet — see step 1 of the
+installing guide. The test suite does not need it.
 
 ## Secrets
 
