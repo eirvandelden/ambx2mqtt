@@ -73,6 +73,24 @@ class LightingALampTest < Minitest::Test
     assert_equal [ 0xA1, 0x3B, 0x03, 255, 0, 0 ], @connection.commands.last
   end
 
+  def test_a_command_nobody_can_read_is_ignored_rather_than_taking_the_daemon_down
+    ask_for "not json at all"
+
+    assert_empty @connection.commands
+  end
+
+  def test_a_command_nobody_can_read_leaves_the_set_reachable
+    ask_for "not json at all"
+
+    assert_equal "online", @broker.reported("ambx2mqtt/desk/availability")
+  end
+
+  def test_a_command_that_never_says_whether_to_light_up_is_ignored_too
+    ask_for %({"brightness":128})
+
+    assert_equal "online", @broker.reported("ambx2mqtt/desk/availability")
+  end
+
   private
 
   def ask_for(payload)

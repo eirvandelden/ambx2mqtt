@@ -88,12 +88,18 @@ module Ambx2mqtt
     def take_commands_for(set)
       set.lamps.each do |lamp|
         @broker.on_command(topics_for(set.identity).command_for(lamp)) do |payload|
-          @one_at_a_time.synchronize do
-            show(set, lamp, LampCommand.parse(payload))
-            @memory.remember(set.identity, lamp.topic_name, lamp.state)
-          end
+          @one_at_a_time.synchronize { obey(set, lamp, payload) }
         end
       end
+    end
+
+    # A command that makes no sense says nothing about whether the set is there,
+    # so the set is left as it was and the daemon carries on.
+    def obey(set, lamp, payload)
+      show(set, lamp, LampCommand.parse(payload))
+      @memory.remember(set.identity, lamp.topic_name, lamp.state)
+    rescue CannotReadCommand => error
+      Ambx2mqtt.logger.warn("ignoring a command for the set #{set.identity}: #{error.message}")
     end
 
     # A set can be unplugged between one command and the next. However the driver
