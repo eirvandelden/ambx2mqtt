@@ -125,6 +125,7 @@ journalctl --user -u ambx2mqtt -f
 | What you see | What it means |
 | --- | --- |
 | `cannot load such file -- libambx` | the driver is not installed; see step 1 |
+| `the configuration does not say where the broker is` | the `broker:` block has no `host:`; see step 3 |
 | `1Password would not give up op://...` | 1Password is locked, or the reference is wrong. The message names the reference, never the password |
 | `the set ... would not open` | another program is holding the USB device, or it needs replugging. The daemon tries again next round |
 | lamps greyed out in Home Assistant | the set was unplugged, or the daemon stopped. Both report offline |

@@ -29,7 +29,7 @@ A daemon that, given something answering "which sets are attached":
   the repository, and a secret never shows itself when printed.
 - Does its rounds while running, so an unplug is noticed.
 
-Eighty-three tests, no hardware and no broker needed. They assert the bytes we send and the payloads we
+Ninety-five tests, no hardware and no broker needed. They assert the bytes we send and the payloads we
 publish, not what anyone else's tool does with them.
 
 ## What the daemon needs from the driver

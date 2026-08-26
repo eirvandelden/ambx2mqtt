@@ -23,6 +23,8 @@ begin
   Ambx2mqtt::Installation.new(configuration, controllers: Ambx).daemon.run
 rescue Errno::ENOENT
   abort("ambx2mqtt cannot find a configuration file at #{configuration_path}")
+rescue Ambx2mqtt::CannotStart => error
+  abort("ambx2mqtt cannot start: #{error.message}")
 rescue Ambx2mqtt::CannotReadSecret => error
   abort("#{error.message}. Unlock 1Password and try again.")
 rescue Interrupt
