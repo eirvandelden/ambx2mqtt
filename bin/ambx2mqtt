@@ -2,7 +2,6 @@
 
 require "bundler/setup"
 require "optparse"
-require "mqtt"
 require "libambx"
 
 $LOAD_PATH.unshift File.expand_path("../lib", __dir__)
@@ -20,16 +19,4 @@ abort("ambx2mqtt needs a configuration file: ambx2mqtt --config PATH") unless co
 configuration = Ambx2mqtt::Configuration.read(configuration_path)
 Ambx2mqtt.logger.level = configuration.log_level
 
-client = MQTT::Client.new(
-  host: configuration.broker_host,
-  port: configuration.broker_port,
-  username: configuration.broker_username.reveal,
-  password: configuration.broker_password.reveal,
-  client_id: Ambx2mqtt::NAME
-)
-
-Ambx2mqtt::Daemon.new(
-  driver: Ambx2mqtt::AmbxDriver.new(Ambx, names: configuration),
-  broker: Ambx2mqtt::Broker.new(client),
-  memory: Ambx2mqtt::RememberedState.new(configuration.state_file)
-).run
+Ambx2mqtt::Installation.new(configuration, controllers: Ambx).daemon.run
