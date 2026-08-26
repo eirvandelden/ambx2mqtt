@@ -4,11 +4,14 @@
 # daemon reads it from 1Password at startup with the `op` command, so unlock
 # 1Password before the daemon starts. A plain password also works if you would
 # rather not use 1Password.
+#
+# The username may be a reference too, so a broker account kept in 1Password
+# lives in one place rather than two.
 
 broker:
   host: mqtt.home.arpa
   port: 1883
-  username: ambx2mqtt
+  username: op://Familie/MqttBroker/username
   password: op://Familie/MqttBroker/password
 
 # Where the daemon remembers what each lamp was last asked for. Leave this out

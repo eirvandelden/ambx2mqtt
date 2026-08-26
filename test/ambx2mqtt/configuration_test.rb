@@ -4,12 +4,10 @@ class ConfigurationTest < Minitest::Test
   EXAMPLE = File.expand_path("../../config/ambx2mqtt.example.yml", __dir__).freeze
 
   def test_the_broker_is_read_from_the_file
-    configuration = configured("broker" => { "host" => "mqtt.home.arpa", "port" => 8883,
-                                             "username" => "ambx2mqtt" })
+    configuration = configured("broker" => { "host" => "mqtt.home.arpa", "port" => 8883 })
 
     assert_equal "mqtt.home.arpa", configuration.broker_host
     assert_equal 8883, configuration.broker_port
-    assert_equal "ambx2mqtt", configuration.broker_username
   end
 
   def test_a_broker_with_no_port_of_its_own_is_reached_the_usual_way
@@ -20,6 +18,18 @@ class ConfigurationTest < Minitest::Test
     configuration = configured("broker" => { "password" => "op://Familie/MqttBroker/password" })
 
     assert_equal "op://Familie/MqttBroker/password", configuration.broker_password.to_s
+  end
+
+  def test_the_broker_username_may_also_say_where_it_lives_rather_than_spelling_it_out
+    configuration = configured("broker" => { "username" => "op://Familie/MqttBroker/username" })
+
+    assert_equal "op://Familie/MqttBroker/username", configuration.broker_username.to_s
+  end
+
+  def test_a_broker_username_written_out_in_the_configuration_is_used_as_it_stands
+    configuration = configured("broker" => { "username" => "ambx2mqtt" })
+
+    assert_equal "ambx2mqtt", configuration.broker_username.reveal
   end
 
   def test_the_memory_lives_where_the_file_says

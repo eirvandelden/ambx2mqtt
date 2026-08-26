@@ -23,7 +23,7 @@ module Ambx2mqtt
     end
 
     def broker_username
-      broker["username"]
+      Secret.new(broker["username"])
     end
 
     def broker_password
