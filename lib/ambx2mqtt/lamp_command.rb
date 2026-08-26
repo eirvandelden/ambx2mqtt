@@ -1,9 +1,15 @@
 module Ambx2mqtt
   # What Home Assistant asked a lamp to do. Colour and brightness are absent when
-  # they should stay as they are.
+  # they should stay as they are. Nothing at all comes back from a payload that
+  # cannot be read as a command.
   class LampCommand
     def self.parse(payload)
-      new(JSON.parse(payload))
+      asked = JSON.parse(payload)
+      return unless asked.is_a?(Hash) && asked.key?("state")
+
+      new(asked)
+    rescue JSON::ParserError
+      nil
     end
 
     def initialize(asked)
