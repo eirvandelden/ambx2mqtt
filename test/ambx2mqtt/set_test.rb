@@ -31,6 +31,18 @@ class SetTest < Minitest::Test
     assert_equal [ 0xA1, 0x2B, 0x03, 255, 0, 0 ], connection.commands.last
   end
 
+  def test_a_set_that_took_the_command_says_so
+    set = Ambx2mqtt::Set.new(identity: "desk", connection: StandInConnection.new)
+
+    assert_equal true, set.show(lamp_called("left", set), RED)
+  end
+
+  def test_a_set_that_has_gone_says_the_command_did_not_land
+    set = Ambx2mqtt::Set.new(identity: "desk", connection: UnpluggedConnection.new)
+
+    assert_equal false, set.show(lamp_called("left", set), RED)
+  end
+
   private
 
   def lamp_called(name, set)
