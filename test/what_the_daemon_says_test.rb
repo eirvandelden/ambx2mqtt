@@ -54,6 +54,16 @@ class WhatTheDaemonSaysTest < Minitest::Test
     assert_match(/ignoring a command .*port_1_2_2/, @said.string)
   end
 
+  def test_a_command_for_a_set_that_has_gone_is_not_blamed_on_the_hardware
+    @daemon.look_around
+    @controllers.unplug("port:1-2.2")
+    @daemon.look_around
+
+    @broker.deliver("ambx2mqtt/port_1_2_2/left/set", %({"state":"ON"}))
+
+    refute_match(/could not reach/, @said.string)
+  end
+
   def test_a_controller_that_will_not_open_says_so_rather_than_disappearing_quietly
     @controllers.plug_in(StandInController.new(identity: "port:1-2.3", opens: false))
 

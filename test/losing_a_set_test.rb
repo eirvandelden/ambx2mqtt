@@ -123,7 +123,29 @@ class LosingASetTest < Minitest::Test
            "the daemon keeps repeating that a set it lost long ago is away"
   end
 
+  def test_a_set_that_cannot_be_reached_as_it_arrives_is_not_reported_available
+    daemon = daemon_over_a_vanished_set_remembering_a_red_lamp
+
+    daemon.look_around
+
+    assert_equal "offline", @broker.reported(AVAILABILITY_TOPIC)
+  end
+
+  def test_a_set_that_cannot_be_reached_is_not_announced_over_and_over
+    daemon = daemon_over_a_vanished_set_remembering_a_red_lamp
+
+    4.times { daemon.look_around }
+
+    assert_equal 1, @broker.announcements.size
+  end
+
   private
+
+  def daemon_over_a_vanished_set_remembering_a_red_lamp
+    red = { "state" => "ON", "brightness" => 255, "color" => { "r" => 255, "g" => 0, "b" => 0 } }
+    Ambx2mqtt::Daemon.new(driver: StandInDriver.new(Ambx2mqtt::Set.new(identity: "desk", connection: VanishedConnection.new)),
+                          broker: @broker, memory: StandInMemory.new("desk" => { "left" => red }), clock: @clock)
+  end
 
   def daemon_over(set)
     Ambx2mqtt::Daemon.new(driver: StandInDriver.new(set), broker: @broker,

@@ -10,9 +10,7 @@ module Ambx2mqtt
       @broker = broker
       @memory = memory
       @clock = clock
-      @attached = {}
-      @reported_away = []
-      @topics = {}
+      @watched = {}
       @one_at_a_time = Mutex.new
     end
 
@@ -33,7 +31,7 @@ module Ambx2mqtt
       attached = @driver.attached_sets
 
       attached.each do |set|
-        arrive(set) unless @attached.key?(set.identity)
+        watch_over(set.identity).arrive(set)
         @memory.seen(set.identity, @clock.now)
       end
 
@@ -41,81 +39,28 @@ module Ambx2mqtt
       forget_the_long_gone
     end
 
-    def arrive(set)
-      @attached[set.identity] = set
-      @reported_away.delete(set.identity)
-      @broker.announce(**Announcement.new(set).to_home_assistant)
-      put_back(set)
-      take_commands_for(set)
-      @broker.report(topics_for(set.identity).availability, ONLINE)
-      Ambx2mqtt.logger.info("found the set #{set.identity}, calling it #{set.name.inspect}")
-    end
-
     # Every set the daemon has ever seen, not only those it saw this run: one
     # that was already away at startup still has to be reported away, or Home
     # Assistant goes on showing whatever it was told last time.
     def depart(still_attached)
-      ((@attached.keys | @memory.known.keys) - still_attached).each { |identity| lose(identity) }
-    end
-
-    def lose(identity)
-      return if @reported_away.include?(identity)
-
-      @broker.report(topics_for(identity).availability, OFFLINE)
-      @attached.delete(identity)
-      @reported_away << identity
-      Ambx2mqtt.logger.info("lost the set #{identity}")
+      ((@watched.keys | @memory.known.keys) - still_attached).each { |identity| watch_over(identity).depart }
     end
 
     def forget_the_long_gone
       @memory.known.each do |identity, last_seen|
-        next if @attached.key?(identity)
+        next if watch_over(identity).here?
         next unless @clock.now - last_seen > GRACE_PERIOD
 
         @broker.forget(Announcement.device_id(identity))
         @memory.forget(identity)
+        @watched.delete(identity)
         Ambx2mqtt.logger.info("forgetting the set #{identity}; gone for more than two days")
       end
     end
 
-    def put_back(set)
-      set.lamps.each do |lamp|
-        asked = @memory.for(set.identity, lamp.topic_name)
-        show(set, lamp, LampCommand.new(asked)) if asked
-      end
-    end
-
-    def take_commands_for(set)
-      set.lamps.each do |lamp|
-        @broker.on_command(topics_for(set.identity).command_for(lamp)) do |payload|
-          @one_at_a_time.synchronize { obey(set, lamp, payload) }
-        end
-      end
-    end
-
-    # A command that makes no sense says nothing about whether the set is there,
-    # so the set is left as it was and the daemon carries on.
-    def obey(set, lamp, payload)
-      show(set, lamp, LampCommand.parse(payload))
-      @memory.remember(set.identity, lamp.topic_name, lamp.state)
-    rescue CannotReadCommand => error
-      Ambx2mqtt.logger.warn("ignoring a command for the set #{set.identity}: #{error.message}")
-    end
-
-    # A set can be unplugged between one command and the next. However the driver
-    # says so, it must not take the daemon down: the set is simply lost, and the
-    # others carry on.
-    def show(set, lamp, command)
-      reached = set.show(lamp, command)
-      @broker.report(topics_for(set.identity).state_for(lamp), lamp.state.to_json)
-      lose(set.identity) unless reached
-    rescue StandardError => error
-      Ambx2mqtt.logger.warn("could not reach the set #{set.identity}: #{error.message}")
-      lose(set.identity)
-    end
-
-    def topics_for(identity)
-      @topics[identity] ||= Topics.new(identity)
+    def watch_over(identity)
+      @watched[identity] ||= WatchedSet.new(identity, broker: @broker, memory: @memory,
+                                            one_at_a_time: @one_at_a_time)
     end
   end
 end
