@@ -1,4 +1,5 @@
 require "test_helper"
+require "stringio"
 
 class AmbxDriverTest < Minitest::Test
   RED_AT_FULL = Ambx2mqtt::LampCommand.new("state" => "ON", "brightness" => 255,
@@ -93,6 +94,18 @@ class AmbxDriverTest < Minitest::Test
                      configuration: Ambx2mqtt::Configuration.new("sets" => { "port_1_2_3" => "Study" }))
 
     assert_equal [ "amBX", "Study" ], driver.attached_sets.map(&:name)
+  end
+
+  def test_two_controllers_that_end_up_with_the_same_name_are_not_silently_one_set
+    said = StringIO.new
+    before = Ambx2mqtt.logger
+    Ambx2mqtt.logger = Logger.new(said)
+
+    driving(controller("port:1-2"), controller("port_1_2")).attached_sets
+
+    assert_match(/port_1_2/, said.string, "two controllers collapsed into one set without a word")
+  ensure
+    Ambx2mqtt.logger = before
   end
 
   private
