@@ -15,9 +15,13 @@ broker:
 # and it lives under your own state directory.
 state_file: ~/.local/state/ambx2mqtt/state.json
 
-# Optional. Give a set a name a person would recognise; the key is the set's
-# identity, which the daemon logs when it finds one. Sets left out here are
-# called by their identity.
+# Optional. Give a set a name a person would recognise. The key is the set's
+# identity, which the daemon logs when it finds one: serial_ and the box's
+# serial number, or port_ and where it is plugged in when it has no serial.
+# A set left out here is called by its identity.
+#
+# A set with no serial is known by where it is plugged in, so moving it to a
+# different socket gives it a new identity and it needs naming again.
 sets:
-  AB12CD34: Living room
-  usb-20-3: Study
+  serial_AB12CD34: Living room
+  port_1_2_3: Study
