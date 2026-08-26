@@ -75,11 +75,13 @@ Two further needs:
 
 ## Answered by real hardware, 26 August 2026
 
-Two sets attached, Philips `0x0471:0x083F`, at port paths `[1, 2, 2]` and `[1, 2, 3]`.
+Two sets attached, Philips `0x0471:0x083F`, at port paths `[1, 2, 2]` and `[1, 2, 3]`. Driven
+through the daemon's own code with a throwaway libusb shim standing in for `libambx`.
 
-**Neither box has a serial number.** Both report `iSerialNumber` descriptor index `0`, meaning no
-serial descriptor at all. libusb's Ruby binding returns the placeholder string `"?"` for that,
-which is *non-empty*.
+### Neither box has a serial number
+
+Both report `iSerialNumber` descriptor index `0`, meaning no serial descriptor at all. libusb's
+Ruby binding returns the placeholder string `"?"` for that, which is *non-empty*.
 
 This matters for `libambx`. Its design says to use `serial:<serial_number>` "when the descriptor
 reports a non-empty serial number" — and `"?"` passes that test, so both boxes would be given the
@@ -91,6 +93,30 @@ chain of physical ports, so it survives a replug into the same socket and a rebo
 to a different socket, or putting a hub in between, gives it a new identity: the old device goes
 unavailable and is dropped after two days, a new unnamed device appears, remembered colours do not
 follow, and anything referring to the old entities has to be repointed.
+
+### The lamp addresses are right; the speakers were re-cabled
+
+Lighting one lamp at a time showed the lamp the code calls `left` on the physical right. The
+wallwasher was correct throughout, which ruled out a wrong address map: the two side speakers are
+separate units on cables and had been plugged into each other's socket. That is what the
+`sides_swapped` setting is for, and with it on the same request lit the left-hand speaker.
+
+### What was checked, and passed
+
+- Both boxes discovered as separate sets, each with its own identity and configured name.
+- Commanding one set left the other dark.
+- All five lamp addresses drive the lamp they name.
+- Off sends black: lighting one lamp darkened the other four.
+- Brightness scales the colour on the wire — red at half brightness sent `128, 0, 0`.
+- Remembering across a restart, in two separate processes against one memory file: the second
+  process put `[0xA1, 0x1B, 0x03, 128, 0, 0]` back on the wire without being asked.
+- A controller that will not open is logged and skipped rather than crashing the daemon.
+
+### Not yet checked
+
+- Anything involving the broker or Home Assistant: no broker was reachable and the 1Password CLI
+  was not signed in.
+- Unplug and replug, and sleep and wake. Both need someone at the desk.
 
 ## Still open
 
