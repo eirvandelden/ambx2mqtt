@@ -1,11 +1,10 @@
 # Stands in for the MQTT gem's client, recording what the broker asked it to do.
 class StandInMqttClient
-  attr_reader :published, :subscribed, :announced_device, :announced_lamps, :will, :connected
+  attr_reader :published, :subscribed, :will, :connected
 
   def initialize(arriving: [])
     @published = []
     @subscribed = []
-    @announced_lamps = []
     @arriving = arriving
   end
 
@@ -25,8 +24,11 @@ class StandInMqttClient
     @subscribed.concat(topics)
   end
 
-  def get(&)
-    @arriving.each(&)
+  # The real client hands over one arriving message, which knows its own topic.
+  Arriving = Struct.new(:topic, :payload)
+
+  def get
+    @arriving.each { |topic, payload| yield Arriving.new(topic, payload) }
   end
 
   def publish_hass_device(device_id, **attributes)

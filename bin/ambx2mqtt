@@ -2,7 +2,7 @@
 
 require "bundler/setup"
 require "optparse"
-require "mqtt/home_assistant"
+require "mqtt"
 require "libambx"
 
 $LOAD_PATH.unshift File.expand_path("../lib", __dir__)
@@ -23,7 +23,7 @@ Ambx2mqtt.logger.level = configuration.log_level
 client = MQTT::Client.new(
   host: configuration.broker_host,
   port: configuration.broker_port,
-  username: configuration.broker_username,
+  username: configuration.broker_username.reveal,
   password: configuration.broker_password.reveal,
   client_id: Ambx2mqtt::NAME
 )

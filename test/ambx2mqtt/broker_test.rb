@@ -11,19 +11,21 @@ class BrokerTest < Minitest::Test
                  client.published
   end
 
-  def test_announcing_a_set_offers_home_assistant_one_device_carrying_its_lamps
+
+  def test_the_broker_offers_home_assistant_the_announcement_a_set_actually_makes
+    set = Ambx2mqtt::Set.new(identity: "desk", connection: StandInConnection.new)
     client = StandInMqttClient.new
-    broker = Ambx2mqtt::Broker.new(client)
 
-    broker.announce(device_id: "ambx2mqtt_desk",
-                    device: { name: "desk" },
-                    origin: { name: "ambx2mqtt" },
-                    lamps: [ { object_id: "left", name: "Left", command_topic: "ambx2mqtt/desk/left/set" } ])
+    Ambx2mqtt::Broker.new(client).announce(**Ambx2mqtt::Announcement.new(set).to_home_assistant)
 
-    assert_equal "ambx2mqtt_desk", client.announced_device[:device_id]
-    assert_equal({ name: "desk" }, client.announced_device[:device])
-    assert_equal [ "left" ], client.announced_lamps.map { |lamp| lamp[:object_id] }
-    assert_equal "Left", client.announced_lamps.first[:name]
+    offered = client.published.first
+    assert_equal "homeassistant/device/ambx2mqtt_desk/config", offered[:topic]
+    assert offered[:retain], "Home Assistant would forget the set as soon as it looked away"
+
+    described = JSON.parse(offered[:payload])
+    assert_equal "all", described["availability_mode"]
+    assert_equal 2, described["availability"].size
+    assert_equal 5, described["components"].size
   end
 
   def test_listening_for_a_lamps_commands_subscribes_to_its_command_topic

@@ -17,16 +17,14 @@ module Ambx2mqtt
       report(reporting_availability_on, ONLINE)
     end
 
-    def announce(device_id:, device:, origin:, lamps:)
-      @client.publish_hass_device(device_id, device: device, origin: origin) do
-        lamps.each { |lamp| @client.publish_hass_light(lamp.fetch(:object_id), **lamp.except(:object_id)) }
-      end
+    def announce(device_id:, **described)
+      @client.publish(announcement_topic(device_id), JSON.generate(described), retain: true, qos: 1)
     end
 
     # An empty retained payload on the announcement topic is how Home Assistant
     # is told to drop the device and its lamps.
     def forget(device_id)
-      @client.publish("#{DISCOVERY_PREFIX}/device/#{device_id}/config", "", retain: true, qos: 1)
+      @client.publish(announcement_topic(device_id), "", retain: true, qos: 1)
     end
 
     def on_command(topic, &listener)
@@ -39,9 +37,15 @@ module Ambx2mqtt
     end
 
     def listen
-      @client.get do |topic, payload|
-        @listeners[topic]&.call(payload)
+      @client.get do |arriving|
+        @listeners[arriving.topic]&.call(arriving.payload)
       end
+    end
+
+    private
+
+    def announcement_topic(device_id)
+      "#{DISCOVERY_PREFIX}/device/#{device_id}/config"
     end
   end
 end
