@@ -76,6 +76,25 @@ class AmbxDriverTest < Minitest::Test
     assert_equal [ 0xA1, 0x1B, 0x03, 255, 0, 0 ], re_cabled.written.last
   end
 
+  def test_a_set_nobody_has_named_is_simply_called_ambx
+    driver = driving(controller("port:1-2.2"))
+
+    assert_equal [ "amBX" ], driver.attached_sets.map(&:name)
+  end
+
+  def test_a_second_unnamed_set_is_told_apart_by_a_number
+    driver = driving(controller("port:1-2.3"), controller("port:1-2.2"))
+
+    assert_equal [ "amBX", "amBX 2" ], driver.attached_sets.map(&:name)
+  end
+
+  def test_a_set_the_configuration_has_named_keeps_that_name
+    driver = driving(controller("port:1-2.2"), controller("port:1-2.3"),
+                     configuration: Ambx2mqtt::Configuration.new("sets" => { "port_1_2_3" => "Study" }))
+
+    assert_equal [ "amBX", "Study" ], driver.attached_sets.map(&:name)
+  end
+
   private
 
   def controller(identity, opens: true)

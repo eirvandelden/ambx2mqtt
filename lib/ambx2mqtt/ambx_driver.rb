@@ -7,6 +7,7 @@ module Ambx2mqtt
   # away has its set dropped, so coming back gets a freshly opened one.
   class AmbxDriver
     UNSAFE_IN_A_TOPIC = /[^A-Za-z0-9_]/
+    WHAT_THEY_ARE = "amBX".freeze
 
     def initialize(controllers, configuration:)
       @controllers = controllers
@@ -18,7 +19,9 @@ module Ambx2mqtt
       plugged_in = plugged_in_by_identity
 
       @sets.select! { |identity, _| plugged_in.key?(identity) }
-      plugged_in.each { |identity, controller| take_on(identity, controller) }
+      plugged_in.keys.sort.each_with_index do |identity, position|
+        take_on(identity, plugged_in.fetch(identity), position)
+      end
 
       @sets.values
     end
@@ -38,7 +41,7 @@ module Ambx2mqtt
       controller.identity&.gsub(UNSAFE_IN_A_TOPIC, "_")
     end
 
-    def take_on(identity, controller)
+    def take_on(identity, controller, position)
       return if @sets.key?(identity)
 
       unless controller.open
@@ -47,8 +50,16 @@ module Ambx2mqtt
       end
 
       @sets[identity] = Set.new(identity: identity, connection: controller,
-                                name: @configuration.name_for(identity),
+                                name: @configuration.name_for(identity) || plain_name(position),
                                 sides_swapped: @configuration.sides_swapped?(identity))
+    end
+
+    # A set nobody has named is called after what it is, numbered from the
+    # second onwards so two of them can be told apart.
+    def plain_name(position)
+      return WHAT_THEY_ARE if position.zero?
+
+      "#{WHAT_THEY_ARE} #{position + 1}"
     end
   end
 end

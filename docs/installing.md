@@ -48,12 +48,13 @@ bin/ambx2mqtt --config ~/.config/ambx2mqtt/config.yml
 It says what it found:
 
 ```
-found the set port_1_2_2, calling it "port_1_2_2"
-found the set port_1_2_3, calling it "port_1_2_3"
+found the set port_1_2_2, calling it "amBX"
+found the set port_1_2_3, calling it "amBX 2"
 ```
 
-Those are the identities. Put them in the `sets:` section with names you would recognise, and
-restart:
+A set nobody has named is called after what it is, numbered from the second onwards. The first
+word on each line is the set's identity. Put those in the `sets:` section with names you would
+recognise, and restart:
 
 ```yaml
 sets:
@@ -79,6 +80,9 @@ sets:
 
 A set that only needs a name can stay written as just that name. The wallwasher is a single bar,
 so its three zones cannot be re-cabled and need no setting.
+
+The plain `amBX` names are handed out in order of identity, so unplugging one set can renumber
+another. Naming a set in the configuration pins it.
 
 A set with a serial number is called `serial_` and its serial. A set without one — which is what
 the amBX boxes turn out to be — is called `port_` and where it is plugged in. That means moving a

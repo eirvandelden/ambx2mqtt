@@ -48,8 +48,8 @@ class ConfigurationTest < Minitest::Test
     assert_equal "Living room", configuration.name_for("AB12CD34")
   end
 
-  def test_a_set_nobody_has_named_is_called_by_the_only_name_it_has
-    assert_equal "AB12CD34", configured.name_for("AB12CD34")
+  def test_a_set_nobody_has_named_has_no_name_of_its_own
+    assert_nil configured.name_for("AB12CD34")
   end
 
   def test_the_example_that_ships_with_the_daemon_can_actually_be_read

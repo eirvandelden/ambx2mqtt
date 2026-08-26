@@ -38,8 +38,10 @@ module Ambx2mqtt
       @said.fetch("log_level", USUAL_LOG_LEVEL).to_sym
     end
 
+    # Nothing if the set was never named; whoever builds it decides what to call
+    # it then.
     def name_for(set_identity)
-      described(set_identity).fetch("name", set_identity)
+      described(set_identity)["name"]
     end
 
     def sides_swapped?(set_identity)
