@@ -103,20 +103,43 @@ separate units on cables and had been plugged into each other's socket. That is 
 
 ### What was checked, and passed
 
+Against the real broker at `svc-mqtt.home.arpa` and two real sets:
+
 - Both boxes discovered as separate sets, each with its own identity and configured name.
 - Commanding one set left the other dark.
 - All five lamp addresses drive the lamp they name.
 - Off sends black: lighting one lamp darkened the other four.
 - Brightness scales the colour on the wire — red at half brightness sent `128, 0, 0`.
-- Remembering across a restart, in two separate processes against one memory file: the second
-  process put `[0xA1, 0x1B, 0x03, 128, 0, 0]` back on the wire without being asked.
-- A controller that will not open is logged and skipped rather than crashing the daemon.
+- Remembering across a restart, in two separate processes against one memory file.
+- Both sets appeared in Home Assistant as devices with five lamps each.
+- A command sent the way Home Assistant sends one lit the lamp and came back reported.
+- The broker password read from 1Password through an `op://` reference, live.
+- Unplugging a set: reported away, the other kept working, the daemon stayed up.
+- Replugging it: found again within a round, same identity, same lamps.
+- A set that was already away when the daemon started: reported away rather than left
+  looking reachable.
+- The daemon's last will: when the daemon died, the broker published its offline message.
 
-### Not yet checked
+### Four faults only real hardware and a real broker could show
 
-- Anything involving the broker or Home Assistant: no broker was reachable and the 1Password CLI
-  was not signed in.
-- Unplug and replug, and sleep and wake. Both need someone at the desk.
+1. **Commands never reached a lamp.** The MQTT client hands over one arriving message that knows
+   its own topic; the broker was reading it as a topic and a payload.
+2. **Announcing a set raised `unknown keywords`.** The announcement had learned to say who is
+   watching a set; the broker had not.
+3. **Unplugging a set killed the daemon.** A write to the vanished set raised and nothing caught
+   it, taking the other set down too.
+4. **`bin/ambx2mqtt` would have died on its first run**, because the Home Assistant library pulls
+   in only the client and not the packet types.
+
+The first three were hidden by stand-ins more forgiving than the things they stood in for. Each
+now has a test that fails without the fix.
+
+### Known, not fixed
+
+A set nobody has named is called `amBX`, numbered from the second onwards, in order of identity.
+Unplugging one set and letting another arrive can leave two sets sharing a name, because a set
+keeps the name it was given when it was taken on. Naming both sets in the configuration avoids it
+entirely, and that is what this installation does.
 
 ## Still open
 
