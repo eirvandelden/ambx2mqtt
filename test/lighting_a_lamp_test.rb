@@ -73,6 +73,19 @@ class LightingALampTest < Minitest::Test
     assert_equal [ 0xA1, 0x3B, 0x03, 255, 0, 0 ], @connection.commands.last
   end
 
+  def test_a_command_that_is_not_even_json_does_not_take_the_daemon_down
+    ask_for "not json at all"
+
+    assert_empty @connection.commands
+  end
+
+  def test_a_command_that_makes_no_sense_leaves_the_set_alone_rather_than_calling_it_unreachable
+    ask_for %({"brightness":128})
+
+    assert_equal "online", @broker.reported("ambx2mqtt/desk/availability"),
+                 "a set was called unreachable because Home Assistant sent a bad command"
+  end
+
   private
 
   def ask_for(payload)
