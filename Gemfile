@@ -2,7 +2,7 @@ source "https://gem.coop"
 
 ruby file: ".ruby-version"
 
-gem "mqtt-homeassistant"
+gem "mqtt-ccutrer"
 
 group :development, :test do
   gem "bundler-audit", require: false

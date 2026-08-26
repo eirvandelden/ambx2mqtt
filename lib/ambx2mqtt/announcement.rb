@@ -5,6 +5,9 @@ module Ambx2mqtt
     MODEL = "amBX".freeze
     COLOUR_MODE = "rgb".freeze
 
+    # A lamp is only reachable while the daemon and its own set are both here.
+    BOTH_MUST_BE_HERE = "all".freeze
+
     def self.device_id(identity)
       "#{NAME}_#{identity}"
     end
@@ -20,8 +23,8 @@ module Ambx2mqtt
         device: { identifiers: device_id, name: @set.name, manufacturer: MANUFACTURER, model: MODEL },
         origin: { name: NAME },
         availability: [ { topic: Topics.daemon_availability }, { topic: @topics.availability } ],
-        availability_mode: "all",
-        lamps: @set.lamps.map { |lamp| lamp_component(lamp) }
+        availability_mode: BOTH_MUST_BE_HERE,
+        components: @set.lamps.to_h { |lamp| [ lamp.topic_name, lamp_component(lamp) ] }
       }
     end
 
@@ -33,7 +36,7 @@ module Ambx2mqtt
 
     def lamp_component(lamp)
       {
-        object_id: lamp.topic_name,
+        platform: "light",
         name: lamp.name.capitalize,
         unique_id: "#{device_id}_#{lamp.topic_name}",
         schema: :json,

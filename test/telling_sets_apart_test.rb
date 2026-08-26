@@ -32,6 +32,6 @@ class TellingSetsApartTest < Minitest::Test
 
   def test_each_set_keeps_its_lamps_to_itself
     assert_equal [ "ambx2mqtt_serial_AB12CD34_left", "ambx2mqtt_serial_EF56GH78_left" ],
-                 @broker.announcements.map { |announcement| announcement[:lamps].first[:unique_id] }
+                 @broker.announcements.map { |announcement| announcement[:components].values.first[:unique_id] }
   end
 end
