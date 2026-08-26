@@ -30,13 +30,4 @@ class StandInMqttClient
   def get
     @arriving.each { |topic, payload| yield Arriving.new(topic, payload) }
   end
-
-  def publish_hass_device(device_id, **attributes)
-    @announced_device = attributes.merge(device_id: device_id)
-    yield
-  end
-
-  def publish_hass_light(object_id, **attributes)
-    @announced_lamps << attributes.merge(object_id: object_id)
-  end
 end

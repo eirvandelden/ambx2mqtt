@@ -9,6 +9,8 @@ class StandInConnection
 
   def write(bytes)
     @commands << bytes
+
+    true
   end
 end
 

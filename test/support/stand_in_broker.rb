@@ -15,8 +15,8 @@ class StandInBroker
     @connected_reporting_on = reporting_availability_on
   end
 
-  def announce(**description)
-    @announcements << description
+  def announce(device_id:, **described)
+    @announcements << described.merge(device_id: device_id)
   end
 
   def announcement
