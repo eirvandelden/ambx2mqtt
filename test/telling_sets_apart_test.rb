@@ -9,8 +9,10 @@ class TellingSetsApartTest < Minitest::Test
     @living_room = StandInController.new(identity: LIVING_ROOM)
     @study = StandInController.new(identity: STUDY)
     @broker = StandInBroker.new
-    names = StandInNames.new("serial_AB12CD34" => "Living room", "serial_EF56GH78" => "Study")
-    driver = Ambx2mqtt::AmbxDriver.new(StandInControllers.new(@living_room, @study), names: names)
+    configuration = Ambx2mqtt::Configuration.new(
+      "sets" => { "serial_AB12CD34" => "Living room", "serial_EF56GH78" => "Study" }
+    )
+    driver = Ambx2mqtt::AmbxDriver.new(StandInControllers.new(@living_room, @study), configuration: configuration)
 
     Ambx2mqtt::Daemon.new(driver: driver, broker: @broker, memory: StandInMemory.new,
                           clock: StandInClock.new).run

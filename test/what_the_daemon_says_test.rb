@@ -11,7 +11,7 @@ class WhatTheDaemonSaysTest < Minitest::Test
     @clock = StandInClock.new
     @memory = StandInMemory.new
     @daemon = Ambx2mqtt::Daemon.new(
-      driver: Ambx2mqtt::AmbxDriver.new(@controllers, names: StandInNames.new("port_1_2_2" => "Living room")),
+      driver: Ambx2mqtt::AmbxDriver.new(@controllers, configuration: Ambx2mqtt::Configuration.new("sets" => { "port_1_2_2" => "Living room" })),
       broker: StandInBroker.new, memory: @memory, clock: @clock
     )
   end

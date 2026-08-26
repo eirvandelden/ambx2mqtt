@@ -39,7 +39,11 @@ module Ambx2mqtt
     end
 
     def name_for(set_identity)
-      names.fetch(set_identity, set_identity)
+      described(set_identity).fetch("name", set_identity)
+    end
+
+    def sides_swapped?(set_identity)
+      described(set_identity).fetch("sides_swapped", false)
     end
 
     private
@@ -48,8 +52,13 @@ module Ambx2mqtt
       @said.fetch("broker", {})
     end
 
-    def names
-      @said.fetch("sets", {})
+    # A set that only needs a name may be written as just that name.
+    def described(set_identity)
+      described = @said.fetch("sets", {})[set_identity]
+      return described if described.is_a?(Hash)
+      return { "name" => described } if described
+
+      {}
     end
   end
 end
