@@ -29,7 +29,7 @@ A daemon that, given something answering "which sets are attached":
   the repository, and a secret never shows itself when printed.
 - Does its rounds while running, so an unplug is noticed.
 
-Fifty tests, no hardware and no broker needed. They assert the bytes we send and the payloads we
+Eighty-three tests, no hardware and no broker needed. They assert the bytes we send and the payloads we
 publish, not what anyone else's tool does with them.
 
 ## What the daemon needs from the driver
@@ -103,7 +103,10 @@ separate units on cables and had been plugged into each other's socket. That is 
 
 ### What was checked, and passed
 
-Against the real broker at `svc-mqtt.home.arpa` and two real sets:
+Against the real broker at `svc-mqtt.home.arpa` and two real sets — but **through a throwaway
+libusb shim driving the library directly, not through `bin/ambx2mqtt`**. The entrypoint has never
+been run: it needs `libambx`, which does not exist yet. Read every line below as "the library does
+this", not "the installed daemon does this".
 
 - Both boxes discovered as separate sets, each with its own identity and configured name.
 - Commanding one set left the other dark.

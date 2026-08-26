@@ -3,6 +3,7 @@ require "pathname"
 require "time"
 require "open3"
 require "logger"
+require "mqtt"
 require "yaml"
 
 module Ambx2mqtt
@@ -39,3 +40,4 @@ require "ambx2mqtt/remembered_state"
 require "ambx2mqtt/ambx_driver"
 require "ambx2mqtt/broker"
 require "ambx2mqtt/daemon"
+require "ambx2mqtt/installation"
