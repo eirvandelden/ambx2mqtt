@@ -11,16 +11,27 @@ module Ambx2mqtt
 
     attr_reader :identity, :name, :lamps
 
-    def initialize(identity:, connection:, name: identity)
+    def initialize(identity:, connection:, name: identity, sides_swapped: false)
       @identity = identity
       @name = name
       @connection = connection
-      @lamps = LAMP_ADDRESSES.map { |lamp_name, address| Lamp.new(name: lamp_name, address: address) }
+      @lamps = addresses(sides_swapped).map { |lamp_name, address| Lamp.new(name: lamp_name, address: address) }
     end
 
     def show(lamp, command)
       lamp.asked_for(command)
       @connection.write(lamp.command_bytes)
+    end
+
+    private
+
+    # The two side speakers are separate units on cables, so they can be plugged
+    # into each other's socket. The wallwasher is one bar and cannot be.
+    def addresses(sides_swapped)
+      return LAMP_ADDRESSES unless sides_swapped
+
+      LAMP_ADDRESSES.merge("left" => LAMP_ADDRESSES.fetch("right"),
+                           "right" => LAMP_ADDRESSES.fetch("left"))
     end
   end
 end

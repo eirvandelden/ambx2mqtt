@@ -8,9 +8,9 @@ module Ambx2mqtt
   class AmbxDriver
     UNSAFE_IN_A_TOPIC = /[^A-Za-z0-9_]/
 
-    def initialize(controllers, names:)
+    def initialize(controllers, configuration:)
       @controllers = controllers
-      @names = names
+      @configuration = configuration
       @sets = {}
     end
 
@@ -47,7 +47,8 @@ module Ambx2mqtt
       end
 
       @sets[identity] = Set.new(identity: identity, connection: controller,
-                                name: @names.name_for(identity))
+                                name: @configuration.name_for(identity),
+                                sides_swapped: @configuration.sides_swapped?(identity))
     end
   end
 end

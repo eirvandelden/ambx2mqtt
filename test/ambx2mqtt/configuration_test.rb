@@ -54,6 +54,26 @@ class ConfigurationTest < Minitest::Test
     assert_equal :debug, configured("log_level" => "debug").log_level
   end
 
+  def test_a_set_written_as_just_a_name_has_its_speakers_the_usual_way_round
+    configuration = configured("sets" => { "port_1_2_2" => "Living room" })
+
+    assert_equal "Living room", configuration.name_for("port_1_2_2")
+    refute configuration.sides_swapped?("port_1_2_2")
+  end
+
+  def test_a_set_can_say_its_side_speakers_are_plugged_in_the_other_way_round
+    configuration = configured(
+      "sets" => { "port_1_2_2" => { "name" => "Living room", "sides_swapped" => true } }
+    )
+
+    assert_equal "Living room", configuration.name_for("port_1_2_2")
+    assert configuration.sides_swapped?("port_1_2_2")
+  end
+
+  def test_a_set_nobody_has_described_has_its_speakers_the_usual_way_round
+    refute configured.sides_swapped?("port_1_2_2")
+  end
+
   private
 
   def configured(said = {})

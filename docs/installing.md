@@ -61,15 +61,32 @@ sets:
   port_1_2_3: Study
 ```
 
+Home Assistant should now show one device per set, each with five lamps.
+
+## 5. Check which speaker is which
+
+Turn on the lamp called **left** and look at it. The two side speakers are separate units on
+cables, so they can end up in each other's socket. If the lamp on your right lights up, say so and
+the names follow the room rather than the wiring:
+
+```yaml
+sets:
+  port_1_2_2: Living room
+  port_1_2_3:
+    name: Study
+    sides_swapped: true
+```
+
+A set that only needs a name can stay written as just that name. The wallwasher is a single bar,
+so its three zones cannot be re-cabled and need no setting.
+
 A set with a serial number is called `serial_` and its serial. A set without one — which is what
 the amBX boxes turn out to be — is called `port_` and where it is plugged in. That means moving a
 set to a different USB socket gives it a new identity: the old one goes unavailable and is dropped
 after two days, a new unnamed set appears, and the colours do not follow. Keep them in the same
 sockets, or expect to rename after a move.
 
-Home Assistant should now show one device per set, each with five lamps.
-
-## 5. Keep it running
+## 6. Keep it running
 
 ### macOS
 

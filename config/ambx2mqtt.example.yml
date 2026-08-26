@@ -25,6 +25,12 @@ log_level: info
 #
 # A set with no serial is known by where it is plugged in, so moving it to a
 # different socket gives it a new identity and it needs naming again.
+# The two side speakers are separate units on cables, so they can end up in
+# each other's socket. A set that is wired that way says so, and then "left"
+# means the speaker actually on your left. Write a set as a block when it needs
+# more than a name.
 sets:
   serial_AB12CD34: Living room
-  port_1_2_3: Study
+  port_1_2_3:
+    name: Study
+    sides_swapped: true

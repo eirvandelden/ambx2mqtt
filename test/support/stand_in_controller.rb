@@ -43,14 +43,3 @@ class StandInControllers
     @controllers << controller
   end
 end
-
-# Stands in for the configuration's answer to "what should this set be called?".
-class StandInNames
-  def initialize(names = {})
-    @names = names
-  end
-
-  def name_for(identity)
-    @names.fetch(identity, identity)
-  end
-end
