@@ -1,4 +1,6 @@
 module Ambx2mqtt
+  class CannotStart < StandardError; end
+
   # What the daemon was told to do, read from a YAML file. It never holds a
   # password, only a Secret saying where one lives.
   class Configuration
@@ -15,7 +17,7 @@ module Ambx2mqtt
     end
 
     def broker_host
-      broker["host"]
+      broker.fetch("host") { raise CannotStart, "the configuration does not say where the broker is: broker: host" }
     end
 
     def broker_port

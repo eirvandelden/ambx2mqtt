@@ -10,6 +10,12 @@ class ConfigurationTest < Minitest::Test
     assert_equal 8883, configuration.broker_port
   end
 
+  def test_a_configuration_that_never_says_where_the_broker_is_says_so_plainly
+    error = assert_raises(Ambx2mqtt::CannotStart) { configured.broker_host }
+
+    assert_equal "the configuration does not say where the broker is: broker: host", error.message
+  end
+
   def test_a_broker_with_no_port_of_its_own_is_reached_the_usual_way
     assert_equal 1883, configured("broker" => { "host" => "mqtt.home.arpa" }).broker_port
   end
