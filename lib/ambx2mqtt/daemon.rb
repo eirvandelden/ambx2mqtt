@@ -19,7 +19,7 @@ module Ambx2mqtt
     def run
       @broker.connect(reporting_availability_on: Topics.daemon_availability)
       look_around
-      @clock.every_round { look_around }
+      @clock.every_round { another_round }
       @broker.listen
     end
 
@@ -28,6 +28,14 @@ module Ambx2mqtt
     end
 
     private
+
+    # One round going wrong must not be the last one: whatever the driver did,
+    # the daemon carries on looking and says what happened.
+    def another_round
+      look_around
+    rescue StandardError => error
+      Ambx2mqtt.logger.error("a round of looking around went wrong: #{error.message}")
+    end
 
     def look_around_now
       attached = @driver.attached_sets
