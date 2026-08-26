@@ -40,7 +40,11 @@ module Ambx2mqtt
 
     def take_on(identity, controller)
       return if @sets.key?(identity)
-      return unless controller.open
+
+      unless controller.open
+        Ambx2mqtt.logger.warn("the set #{identity} would not open; trying again next time")
+        return
+      end
 
       @sets[identity] = Set.new(identity: identity, connection: controller,
                                 name: @names.name_for(identity))

@@ -1,0 +1,112 @@
+# Installing ambx2mqtt
+
+Run this on the computer the amBX sets are plugged into. Installation is for developers: a
+checkout and Bundler, not a package.
+
+## 1. The driver
+
+ambx2mqtt reaches the sets through the `libambx` gem, which is not published yet. Until it is, add
+it to the `Gemfile` from wherever it lives:
+
+```ruby
+gem "libambx", github: "eirvandelden/ambx"
+```
+
+Without it `bin/ambx2mqtt` stops at `cannot load such file -- libambx`. Nothing else in the
+project needs it — the test suite runs without it.
+
+## 2. The checkout
+
+```
+git clone git@github.com:eirvandelden/ambx2mqtt.git
+cd ambx2mqtt
+rv install          # installs the Ruby named in .ruby-version
+bundle install
+```
+
+## 3. The configuration
+
+```
+mkdir -p ~/.config/ambx2mqtt
+cp config/ambx2mqtt.example.yml ~/.config/ambx2mqtt/config.yml
+$EDITOR ~/.config/ambx2mqtt/config.yml
+```
+
+Fill in your broker. The password is never written in the file — put a 1Password reference like
+`op://Familie/MqttBroker/password` and the daemon reads it at startup with the `op` command.
+Unlock 1Password before the daemon starts.
+
+Leave the `sets:` section alone for now. You cannot know what your sets are called until the
+daemon has seen them.
+
+## 4. Run it once by hand
+
+```
+bin/ambx2mqtt --config ~/.config/ambx2mqtt/config.yml
+```
+
+It says what it found:
+
+```
+found the set port_1_2_2, calling it "port_1_2_2"
+found the set port_1_2_3, calling it "port_1_2_3"
+```
+
+Those are the identities. Put them in the `sets:` section with names you would recognise, and
+restart:
+
+```yaml
+sets:
+  port_1_2_2: Living room
+  port_1_2_3: Study
+```
+
+A set with a serial number is called `serial_` and its serial. A set without one — which is what
+the amBX boxes turn out to be — is called `port_` and where it is plugged in. That means moving a
+set to a different USB socket gives it a new identity: the old one goes unavailable and is dropped
+after two days, a new unnamed set appears, and the colours do not follow. Keep them in the same
+sockets, or expect to rename after a move.
+
+Home Assistant should now show one device per set, each with five lamps.
+
+## 5. Keep it running
+
+### macOS
+
+```
+cp service/nl.eirvandelden.ambx2mqtt.plist ~/Library/LaunchAgents/
+$EDITOR ~/Library/LaunchAgents/nl.eirvandelden.ambx2mqtt.plist   # replace CHECKOUT and USERNAME
+launchctl load ~/Library/LaunchAgents/nl.eirvandelden.ambx2mqtt.plist
+```
+
+It is a LaunchAgent rather than a LaunchDaemon on purpose: it needs your 1Password session to read
+the broker password, and your USB access to reach the sets. Logs go to
+`~/Library/Logs/ambx2mqtt.log`.
+
+To stop it:
+
+```
+launchctl unload ~/Library/LaunchAgents/nl.eirvandelden.ambx2mqtt.plist
+```
+
+### Linux
+
+```
+cp service/ambx2mqtt.service ~/.config/systemd/user/
+$EDITOR ~/.config/systemd/user/ambx2mqtt.service   # replace CHECKOUT
+systemctl --user daemon-reload
+systemctl --user enable --now ambx2mqtt
+journalctl --user -u ambx2mqtt -f
+```
+
+## When something is wrong
+
+| What you see | What it means |
+| --- | --- |
+| `cannot load such file -- libambx` | the driver is not installed; see step 1 |
+| `1Password would not give up op://...` | 1Password is locked, or the reference is wrong. The message names the reference, never the password |
+| `the set ... would not open` | another program is holding the USB device, or it needs replugging. The daemon tries again next round |
+| lamps greyed out in Home Assistant | the set was unplugged, or the daemon stopped. Both report offline |
+| lamps gone from Home Assistant | the set has been unseen for two days and was forgotten. Plug it back in and it returns |
+
+Turn `log_level` up to `debug` in the configuration for more.

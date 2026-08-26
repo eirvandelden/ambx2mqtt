@@ -1,0 +1,23 @@
+# A user unit rather than a system one: the daemon needs the logged-in user's
+# 1Password session to read the broker password. Copy to
+# ~/.config/systemd/user/ and replace CHECKOUT.
+#
+#   systemctl --user daemon-reload
+#   systemctl --user enable --now ambx2mqtt
+
+[Unit]
+Description=Makes Philips amBX light sets available to Home Assistant over MQTT
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=CHECKOUT
+ExecStart=CHECKOUT/bin/ambx2mqtt --config %h/.config/ambx2mqtt/config.yml
+Restart=always
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=default.target

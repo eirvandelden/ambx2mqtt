@@ -15,6 +15,9 @@ broker:
 # and it lives under your own state directory.
 state_file: ~/.local/state/ambx2mqtt/state.json
 
+# How much the daemon says for itself: debug, info, warn or error.
+log_level: info
+
 # Optional. Give a set a name a person would recognise. The key is the set's
 # identity, which the daemon logs when it finds one: serial_ and the box's
 # serial number, or port_ and where it is plugged in when it has no serial.

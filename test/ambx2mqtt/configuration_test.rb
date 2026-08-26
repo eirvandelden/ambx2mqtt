@@ -49,6 +49,11 @@ class ConfigurationTest < Minitest::Test
     assert_match %r{\Aop://}, configuration.broker_password.to_s
   end
 
+  def test_the_daemon_says_as_much_as_the_configuration_asks_it_to
+    assert_equal :info, configured.log_level
+    assert_equal :debug, configured("log_level" => "debug").log_level
+  end
+
   private
 
   def configured(said = {})

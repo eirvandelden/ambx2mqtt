@@ -46,12 +46,14 @@ module Ambx2mqtt
       put_back(set)
       take_commands_for(set)
       @broker.report(topics_for(set.identity).availability, ONLINE)
+      Ambx2mqtt.logger.info("found the set #{set.identity}, calling it #{set.name.inspect}")
     end
 
     def depart(still_attached)
       (@attached.keys - still_attached).each do |identity|
         @broker.report(topics_for(identity).availability, OFFLINE)
         @attached.delete(identity)
+        Ambx2mqtt.logger.info("lost the set #{identity}")
       end
     end
 
@@ -62,6 +64,7 @@ module Ambx2mqtt
 
         @broker.forget(Announcement.device_id(identity))
         @memory.forget(identity)
+        Ambx2mqtt.logger.info("forgetting the set #{identity}; gone for more than two days")
       end
     end
 
