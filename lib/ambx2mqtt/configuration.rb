@@ -45,7 +45,7 @@ module Ambx2mqtt
     end
 
     def sides_swapped?(set_identity)
-      described(set_identity).fetch("sides_swapped", false)
+      described(set_identity)["sides_swapped"] ? true : false
     end
 
     private

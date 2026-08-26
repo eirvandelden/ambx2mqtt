@@ -1,6 +1,7 @@
 require "test_helper"
 require "tmpdir"
 require "fileutils"
+require "json"
 
 class RememberingAcrossRestartsTest < Minitest::Test
   COMMAND_TOPIC = "ambx2mqtt/desk/wallwasher_centre/set".freeze
@@ -56,6 +57,16 @@ class RememberingAcrossRestartsTest < Minitest::Test
     assert_empty connection.commands
     assert_path_exists "#{@path}.unreadable", "the unusable memory was not kept for inspection"
   end
+
+  def test_a_memory_whose_last_seen_makes_no_sense_is_set_aside_rather_than_stopping_every_round
+    File.write(@path, JSON.generate("desk" => { "last_seen" => "yesterday", "lamps" => {} }))
+
+    connection, = start_the_daemon
+
+    assert_empty connection.commands
+    assert_path_exists "#{@path}.unreadable", "the unusable memory was not kept for inspection"
+  end
+
 
   private
 

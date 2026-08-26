@@ -31,8 +31,22 @@ module Ambx2mqtt
     def plugged_in_by_identity
       @controllers.devices.each_with_object({}) do |controller, plugged_in|
         known_as = identify(controller)
-        plugged_in[known_as] = controller if known_as
+        next unless known_as
+        next if already_taken(plugged_in, known_as, controller)
+
+        plugged_in[known_as] = controller
       end
+    end
+
+    # Two controllers can only answer to the same name if their identities differ
+    # by a character that is not safe in a topic. Keeping the first quietly would
+    # hide a whole set.
+    def already_taken(plugged_in, known_as, controller)
+      return false unless plugged_in.key?(known_as)
+
+      Ambx2mqtt.logger.warn("two controllers both want to be called #{known_as}; " \
+                            "ignoring the one at #{controller.identity}")
+      true
     end
 
     # libambx says "serial:AB12CD34" or "port:1-2.3"; neither is safe to put in a

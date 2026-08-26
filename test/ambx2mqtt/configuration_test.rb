@@ -84,6 +84,13 @@ class ConfigurationTest < Minitest::Test
     refute configured.sides_swapped?("port_1_2_2")
   end
 
+  def test_asking_whether_a_sets_speakers_are_swapped_answers_yes_or_no_and_nothing_else
+    configuration = configured("sets" => { "desk" => { "sides_swapped" => "yes please" } })
+
+    assert_equal true, configuration.sides_swapped?("desk")
+    assert_equal false, configured.sides_swapped?("desk")
+  end
+
   private
 
   def configured(said = {})

@@ -28,8 +28,8 @@ module Ambx2mqtt
 
     def known
       @remembered.filter_map do |set_identity, about|
-        last_seen = about[LAST_SEEN]
-        [ set_identity, Time.iso8601(last_seen) ] if last_seen
+        last_seen = last_seen_of(about)
+        [ set_identity, last_seen ] if last_seen
       end.to_h
     end
 
@@ -52,10 +52,27 @@ module Ambx2mqtt
       return {} unless @path.exist?
 
       remembered = parse
-      return remembered if remembered.is_a?(Hash)
+      return remembered if usable?(remembered)
 
       set_aside
       {}
+    end
+
+    # A memory the daemon cannot make sense of is no better than one it cannot
+    # read: a last seen date it does not understand would stop every round.
+    def usable?(remembered)
+      return false unless remembered.is_a?(Hash)
+
+      remembered.each_value { |about| last_seen_of(about) }
+      true
+    rescue ArgumentError, TypeError
+      false
+    end
+
+    def last_seen_of(about)
+      return unless about.is_a?(Hash) && about[LAST_SEEN]
+
+      Time.iso8601(about[LAST_SEEN])
     end
 
     def parse
@@ -68,9 +85,13 @@ module Ambx2mqtt
       @path.rename("#{@path}#{SET_ASIDE_SUFFIX}")
     end
 
+    # Written beside the real file and moved into place, so a crash partway
+    # through leaves the last good memory rather than half of a new one.
     def write
       @path.dirname.mkpath
-      @path.write(JSON.generate(@remembered))
+      being_written = Pathname.new("#{@path}.writing")
+      being_written.write(JSON.generate(@remembered))
+      being_written.rename(@path)
     end
   end
 end

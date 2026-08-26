@@ -16,7 +16,15 @@ end.parse!
 
 abort("ambx2mqtt needs a configuration file: ambx2mqtt --config PATH") unless configuration_path
 
-configuration = Ambx2mqtt::Configuration.read(configuration_path)
-Ambx2mqtt.logger.level = configuration.log_level
+begin
+  configuration = Ambx2mqtt::Configuration.read(configuration_path)
+  Ambx2mqtt.logger.level = configuration.log_level
 
-Ambx2mqtt::Installation.new(configuration, controllers: Ambx).daemon.run
+  Ambx2mqtt::Installation.new(configuration, controllers: Ambx).daemon.run
+rescue Errno::ENOENT
+  abort("ambx2mqtt cannot find a configuration file at #{configuration_path}")
+rescue Ambx2mqtt::CannotReadSecret => error
+  abort("#{error.message}. Unlock 1Password and try again.")
+rescue Interrupt
+  Ambx2mqtt.logger.info("stopping")
+end
