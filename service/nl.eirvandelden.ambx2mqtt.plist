@@ -7,6 +7,9 @@
 
   It starts through a login shell because launchd gives a job almost no PATH of
   its own, and the daemon needs both the rv-managed Ruby and the `op` command.
+  A login shell does not read ~/.zshrc, so PATH must be set in ~/.zshenv or
+  ~/.zprofile. The path to the daemon is absolute because a login shell may
+  change directory before it runs anything.
 
   Copy to ~/Library/LaunchAgents/ and replace CHECKOUT and USERNAME.
 -->
@@ -19,7 +22,7 @@
   <array>
     <string>/bin/zsh</string>
     <string>-lc</string>
-    <string>exec bundle exec ruby bin/ambx2mqtt --config "$HOME/.config/ambx2mqtt/config.yml"</string>
+    <string>exec bundle exec CHECKOUT/bin/ambx2mqtt --config "$HOME/.config/ambx2mqtt/config.yml"</string>
   </array>
 
   <key>WorkingDirectory</key>
