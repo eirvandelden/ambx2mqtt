@@ -12,9 +12,11 @@ module Ambx2mqtt
     # The last word is left with the broker before connecting, so a daemon that
     # dies is still seen to have gone.
     def connect(reporting_availability_on:)
-      @client.set_will(reporting_availability_on, OFFLINE, retain: true)
+      @availability = reporting_availability_on
+      @client.set_will(@availability, OFFLINE, retain: true)
+      @client.on_reconnect { came_back }
       @client.connect
-      report(reporting_availability_on, ONLINE)
+      report(@availability, ONLINE)
     end
 
     def announce(device_id:, **described)
@@ -43,6 +45,15 @@ module Ambx2mqtt
     end
 
     private
+
+    # A dropped connection is the last word the broker had from us, so on the way
+    # back we have to say we are here again. Nothing is listened to across a
+    # reconnect either, so every command topic is asked for afresh.
+    def came_back
+      Ambx2mqtt.logger.info("the connection to the broker came back")
+      @listeners.each_key { |topic| @client.subscribe(topic) }
+      report(@availability, ONLINE)
+    end
 
     def announcement_topic(device_id)
       "#{DISCOVERY_PREFIX}/device/#{device_id}/config"

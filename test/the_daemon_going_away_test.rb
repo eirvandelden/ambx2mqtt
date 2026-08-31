@@ -42,4 +42,28 @@ class TheDaemonGoingAwayTest < Minitest::Test
 
     assert_equal DAEMON_AVAILABILITY, broker.connected_reporting_on
   end
+
+  def test_a_daemon_whose_connection_comes_back_says_it_is_here_again
+    client = StandInMqttClient.new
+    broker = Ambx2mqtt::Broker.new(client)
+    broker.connect(reporting_availability_on: DAEMON_AVAILABILITY)
+    client.published.clear
+
+    client.come_back
+
+    assert_includes client.published,
+                    { topic: DAEMON_AVAILABILITY, payload: "online", retain: true, qos: 0 }
+  end
+
+  def test_a_daemon_whose_connection_comes_back_listens_for_commands_again
+    client = StandInMqttClient.new
+    broker = Ambx2mqtt::Broker.new(client)
+    broker.connect(reporting_availability_on: DAEMON_AVAILABILITY)
+    broker.on_command("ambx2mqtt/desk/left/set") { }
+    client.subscribed.clear
+
+    client.come_back
+
+    assert_equal [ "ambx2mqtt/desk/left/set" ], client.subscribed
+  end
 end
