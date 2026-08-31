@@ -7,9 +7,8 @@ require "libambx"
 $LOAD_PATH.unshift File.expand_path("../lib", __dir__)
 require "ambx2mqtt"
 
-# Run as a service, output goes to a file rather than a terminal, and Ruby holds
-# it in a buffer until there is enough of it. Nobody watching a log wants to wait
-# for that.
+# Logger over an open stream does not flush by itself, so run as a service the
+# log would sit in a buffer rather than appear.
 $stdout.sync = true
 
 configuration_path = nil

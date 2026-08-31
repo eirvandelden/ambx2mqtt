@@ -1,6 +1,11 @@
 # A user unit rather than a system one: the daemon needs the logged-in user's
-# 1Password session to read the broker password. Copy to
-# ~/.config/systemd/user/ and replace CHECKOUT.
+# 1Password session to read the broker password.
+#
+# It starts through a login shell for the same reason the macOS service does:
+# systemd gives a user unit a minimal PATH with no rv shims and no Homebrew, and
+# the daemon needs both the rv-managed Ruby and the `op` command.
+#
+# Copy to ~/.config/systemd/user/ and replace CHECKOUT.
 #
 #   systemctl --user daemon-reload
 #   systemctl --user enable --now ambx2mqtt
@@ -13,7 +18,7 @@ Wants=network-online.target
 [Service]
 Type=simple
 WorkingDirectory=CHECKOUT
-ExecStart=CHECKOUT/bin/ambx2mqtt --config %h/.config/ambx2mqtt/config.yml
+ExecStart=/bin/bash -lc 'exec bundle exec CHECKOUT/bin/ambx2mqtt --config "$HOME/.config/ambx2mqtt/config.yml"'
 Restart=always
 RestartSec=5
 StandardOutput=journal
