@@ -27,19 +27,7 @@ for*, never a reading from the lamp itself.
 
 Installation is for developers: a checkout and Bundler, not a package.
 
-### 1. The driver
-
-ambx2mqtt reaches the sets through the `libambx` gem, which is not on RubyGems. Add it to the
-`Gemfile` from where it lives:
-
-```ruby
-gem "libambx", github: "eirvandelden/libamBX"
-```
-
-Without it `bin/ambx2mqtt` stops at `cannot load such file -- libambx`. Nothing else in the
-project needs it — the test suite runs without it.
-
-### 2. The checkout
+### 1. The checkout
 
 ```
 git clone git@github.com:eirvandelden/ambx2mqtt.git
@@ -48,7 +36,11 @@ rv install          # installs the Ruby named in .ruby-version
 bundle install
 ```
 
-### 3. The configuration
+The sets are reached through the `libambx` gem, which is not on RubyGems, so `bundle install`
+fetches it from GitHub and builds its USB library. That needs network access to
+`github.com/eirvandelden/libamBX` and a compiler.
+
+### 2. The configuration
 
 ```
 mkdir -p ~/.config/ambx2mqtt
@@ -63,7 +55,7 @@ Unlock 1Password before the daemon starts.
 Leave the `sets:` section alone for now. You cannot know what your sets are called until the
 daemon has seen them.
 
-### 4. Run it once by hand
+### 3. Run it once by hand
 
 ```
 bin/ambx2mqtt --config ~/.config/ambx2mqtt/config.yml
@@ -88,7 +80,7 @@ sets:
 
 Home Assistant should now show one device per set, each with five lamps.
 
-### 5. Check which speaker is which
+### 4. Check which speaker is which
 
 Turn on the lamp called **left** and look at it. The two side speakers are separate units on
 cables, so they can end up in each other's socket. If the lamp on your right lights up, say so and
@@ -114,7 +106,7 @@ set to a different USB socket gives it a new identity: the old one goes unavaila
 after two days, a new unnamed set appears, and the colours do not follow. Keep them in the same
 sockets, or expect to rename after a move.
 
-### 6. Keep it running
+### 5. Keep it running
 
 **macOS**
 
@@ -122,7 +114,10 @@ sockets, or expect to rename after a move.
 cp service/nl.eirvandelden.ambx2mqtt.plist ~/Library/LaunchAgents/
 $EDITOR ~/Library/LaunchAgents/nl.eirvandelden.ambx2mqtt.plist   # replace CHECKOUT and USERNAME
 launchctl load ~/Library/LaunchAgents/nl.eirvandelden.ambx2mqtt.plist
+tail ~/Library/Logs/ambx2mqtt.log
 ```
+
+Check that log straight away. A service that cannot start says so there and nowhere else.
 
 It is a LaunchAgent rather than a LaunchDaemon on purpose: it needs your 1Password session to read
 the broker password, and your USB access to reach the sets. It starts through a login shell
@@ -149,8 +144,8 @@ journalctl --user -u ambx2mqtt -f
 
 | What you see | What it means |
 | --- | --- |
-| `cannot load such file -- libambx` | the driver is not installed; see step 1 |
-| `the configuration does not say where the broker is` | the `broker:` block has no `host:`; see step 3 |
+| `cannot load such file -- libambx` | `bundle install` did not finish; run it again and watch for the `libambx` gem |
+| `the configuration does not say where the broker is` | the `broker:` block has no `host:`; see step 2 |
 | `1Password would not give up op://...` | 1Password is locked, or the reference is wrong. The message names the reference, never the password |
 | `the set ... would not open` | another program is holding the USB device, or it needs replugging. The daemon tries again next round |
 | lamps greyed out in Home Assistant | the set was unplugged, or the daemon stopped. Both report offline |
