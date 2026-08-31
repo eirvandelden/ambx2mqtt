@@ -3,7 +3,12 @@
 <!--
   A LaunchAgent, not a LaunchDaemon: the daemon needs the logged-in user's
   1Password session to read the broker password, and their USB access to reach
-  the sets. Copy to ~/Library/LaunchAgents/ and replace CHECKOUT and USERNAME.
+  the sets.
+
+  It starts through a login shell because launchd gives a job almost no PATH of
+  its own, and the daemon needs both the rv-managed Ruby and the `op` command.
+
+  Copy to ~/Library/LaunchAgents/ and replace CHECKOUT and USERNAME.
 -->
 <plist version="1.0">
 <dict>
@@ -12,10 +17,9 @@
 
   <key>ProgramArguments</key>
   <array>
-    <string>/Users/USERNAME/.local/share/rv/shims/ruby</string>
-    <string>CHECKOUT/bin/ambx2mqtt</string>
-    <string>--config</string>
-    <string>/Users/USERNAME/.config/ambx2mqtt/config.yml</string>
+    <string>/bin/zsh</string>
+    <string>-lc</string>
+    <string>exec bundle exec ruby bin/ambx2mqtt --config "$HOME/.config/ambx2mqtt/config.yml"</string>
   </array>
 
   <key>WorkingDirectory</key>
@@ -26,6 +30,9 @@
 
   <key>KeepAlive</key>
   <true/>
+
+  <key>ThrottleInterval</key>
+  <integer>30</integer>
 
   <key>StandardOutPath</key>
   <string>/Users/USERNAME/Library/Logs/ambx2mqtt.log</string>

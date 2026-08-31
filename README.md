@@ -125,8 +125,9 @@ launchctl load ~/Library/LaunchAgents/nl.eirvandelden.ambx2mqtt.plist
 ```
 
 It is a LaunchAgent rather than a LaunchDaemon on purpose: it needs your 1Password session to read
-the broker password, and your USB access to reach the sets. Logs go to
-`~/Library/Logs/ambx2mqtt.log`.
+the broker password, and your USB access to reach the sets. It starts through a login shell
+because launchd gives a job almost no `PATH` of its own, and the daemon needs both the rv-managed
+Ruby and the `op` command. Logs go to `~/Library/Logs/ambx2mqtt.log`.
 
 To stop it:
 
