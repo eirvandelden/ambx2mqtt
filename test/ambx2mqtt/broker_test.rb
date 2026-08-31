@@ -54,6 +54,30 @@ class BrokerTest < Minitest::Test
     assert true, "coming back raised and would have ended the daemon"
   end
 
+  def test_a_daemon_whose_connection_comes_back_says_it_is_here_again
+    client = StandInMqttClient.new
+    broker = Ambx2mqtt::Broker.new(client)
+    broker.connect(reporting_availability_on: "ambx2mqtt/availability")
+    client.published.clear
+
+    client.come_back
+
+    assert_includes client.published,
+                    { topic: "ambx2mqtt/availability", payload: "online", retain: true, qos: 0 }
+  end
+
+  def test_a_daemon_whose_connection_comes_back_listens_for_commands_again
+    client = StandInMqttClient.new
+    broker = Ambx2mqtt::Broker.new(client)
+    broker.connect(reporting_availability_on: "ambx2mqtt/availability")
+    broker.on_command("ambx2mqtt/desk/left/set") { }
+    client.subscribed.clear
+
+    client.come_back
+
+    assert_equal [ "ambx2mqtt/desk/left/set" ], client.subscribed
+  end
+
   def test_listening_for_a_lamps_commands_subscribes_to_its_command_topic
     client = StandInMqttClient.new
     broker = Ambx2mqtt::Broker.new(client)

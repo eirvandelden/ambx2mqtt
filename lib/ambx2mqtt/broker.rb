@@ -12,11 +12,11 @@ module Ambx2mqtt
     # The last word is left with the broker before connecting, so a daemon that
     # dies is still seen to have gone.
     def connect(reporting_availability_on:)
-      @availability = reporting_availability_on
-      @client.set_will(@availability, OFFLINE, retain: true)
+      @availability_topic = reporting_availability_on
+      @client.set_will(@availability_topic, OFFLINE, retain: true)
       @client.on_reconnect { came_back }
       @client.connect
-      report(@availability, ONLINE)
+      report(@availability_topic, ONLINE)
     end
 
     def announce(device_id:, **described)
@@ -56,7 +56,7 @@ module Ambx2mqtt
     def came_back
       Ambx2mqtt.logger.info("the connection to the broker came back")
       @client.subscribe(*listened_to)
-      report(@availability, ONLINE)
+      report(@availability_topic, ONLINE)
     rescue StandardError => error
       Ambx2mqtt.logger.warn("the connection came back but could not be picked up again: #{error.message}")
     end

@@ -25,7 +25,6 @@ class StandInMqttClient
     @came_back = came_back
   end
 
-  # The broker dropped us and the library got us back on its own.
   def come_back
     @came_back&.call
   end
