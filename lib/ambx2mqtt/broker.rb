@@ -46,13 +46,25 @@ module Ambx2mqtt
 
     private
 
-    # A dropped connection is the last word the broker had from us, so on the way
-    # back we have to say we are here again. Nothing is listened to across a
-    # reconnect either, so every command topic is asked for afresh.
+    # While we were away the broker told everyone our last word, that we had
+    # gone, so coming back has to say we are here again. Nothing is listened to
+    # across a reconnect either, so every command topic is asked for afresh.
+    #
+    # A connection that comes back only half way must not be fatal: the library
+    # ends the connection over anything raised here, and that would unwind the
+    # daemon. The next attempt puts it right.
     def came_back
       Ambx2mqtt.logger.info("the connection to the broker came back")
-      @listeners.each_key { |topic| @client.subscribe(topic) }
+      @client.subscribe(*listened_to)
       report(@availability, ONLINE)
+    rescue StandardError => error
+      Ambx2mqtt.logger.warn("the connection came back but could not be picked up again: #{error.message}")
+    end
+
+    # A snapshot, because a set can arrive on the daemon's thread while this runs
+    # on the library's: walking the listeners themselves would break both.
+    def listened_to
+      @listeners.keys
     end
 
     def announcement_topic(device_id)

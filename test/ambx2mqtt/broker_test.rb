@@ -28,6 +28,32 @@ class BrokerTest < Minitest::Test
     assert_equal 5, described["components"].size
   end
 
+  def test_a_command_topic_arriving_while_the_connection_comes_back_does_not_break_it
+    client = StandInMqttClient.new
+    broker = Ambx2mqtt::Broker.new(client)
+    broker.connect(reporting_availability_on: "ambx2mqtt/availability")
+    broker.on_command("ambx2mqtt/desk/left/set") { }
+
+    # A set arriving on the daemon's own thread asks to be listened to while the
+    # connection is being put back together on the library's thread.
+    client.while_subscribing { broker.on_command("ambx2mqtt/study/left/set") { } }
+
+    client.come_back
+
+    assert_includes client.subscribed, "ambx2mqtt/desk/left/set"
+  end
+
+  def test_a_connection_that_comes_back_only_half_way_does_not_take_the_daemon_down
+    client = StandInMqttClient.new(refusing_to_subscribe: true)
+    broker = Ambx2mqtt::Broker.new(client)
+    broker.connect(reporting_availability_on: "ambx2mqtt/availability")
+    broker.on_command("ambx2mqtt/desk/left/set") { }
+
+    client.come_back
+
+    assert true, "coming back raised and would have ended the daemon"
+  end
+
   def test_listening_for_a_lamps_commands_subscribes_to_its_command_topic
     client = StandInMqttClient.new
     broker = Ambx2mqtt::Broker.new(client)

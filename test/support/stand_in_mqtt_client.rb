@@ -2,10 +2,11 @@
 class StandInMqttClient
   attr_reader :published, :subscribed, :will, :connected
 
-  def initialize(arriving: [])
+  def initialize(arriving: [], refusing_to_subscribe: false)
     @published = []
     @subscribed = []
     @arriving = arriving
+    @refusing_to_subscribe = refusing_to_subscribe
   end
 
   def publish(topic, payload, retain: false, qos: 0)
@@ -30,7 +31,18 @@ class StandInMqttClient
   end
 
   def subscribe(*topics)
+    raise "not connected" if @refusing_to_subscribe && @subscribed.any?
+
     @subscribed.concat(topics)
+    interrupting = @while_subscribing
+    @while_subscribing = nil
+    interrupting&.call
+  end
+
+  # Lets a test do something on another thread's behalf midway through a
+  # subscribe, the way a set arriving would.
+  def while_subscribing(&doing)
+    @while_subscribing = doing
   end
 
   # The real client hands over one arriving message, which knows its own topic.
