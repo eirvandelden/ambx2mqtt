@@ -71,8 +71,8 @@ Two further needs:
    because it needs the logged-in user's 1Password session and USB access. Explicit `--config`
    path, the `rv`-managed Ruby, `KeepAlive`, logs to `~/Library/Logs/ambx2mqtt.log`.
 5. **`service/ambx2mqtt.service`** — the systemd user unit, for the day this moves to Linux.
-6. **`docs/installing.md`** — checkout, `rv`, `bundle install`, write the configuration, load the
-   service.
+6. **Installing instructions** — checkout, `rv`, `bundle install`, write the configuration, load the
+   service. These live in the README.
 7. **The hardware walkthrough** — with two sets plugged in, by hand:
    - both discovered, each with its own identity; record whether real serials exist
    - two devices in Home Assistant, ten lamps, all controllable
