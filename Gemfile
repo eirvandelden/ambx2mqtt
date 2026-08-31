@@ -2,6 +2,7 @@ source "https://gem.coop"
 
 ruby file: ".ruby-version"
 
+gem "libambx", github: "eirvandelden/libamBX"
 gem "mqtt-ccutrer"
 
 group :development, :test do
