@@ -3,8 +3,8 @@
 Makes Philips amBX light sets available to Home Assistant over MQTT.
 
 Run it on the computer the amBX sets are plugged into. It finds every attached set, announces
-each one to your MQTT broker, and turns Home Assistant's colour and brightness commands into USB
-writes.
+each one to your MQTT broker, and turns Home Assistant's colour, brightness and fan speed
+commands into USB writes.
 
 ## What you get
 
@@ -20,8 +20,25 @@ Every physical amBX **set** shows up in Home Assistant as one device with five *
 
 Each lamp takes a colour, a brightness and on/off, and remembers what it was last asked for.
 
+A set may also have two **fans**, which are optional accessories rather than part of every box:
+
+| Fan | Where it sits |
+| --- | --- |
+| left fan | beside the screen, on the left |
+| right fan | beside the screen, on the right |
+
+Each fan takes on/off and a speed, and remembers the speed it was last asked for. A fan started
+again comes back at the speed it had.
+
 The hardware cannot be read back, so what Home Assistant shows is always *what was last asked
 for*, never a reading from the lamp itself.
+
+**A set cannot be asked what is attached to it.** The controller never says what accessories are
+plugged in: nothing arrives on either of its incoming USB endpoints, at rest, when it is first
+opened, after a write, or after a USB reset — even with a fan attached. Writing to a fan that is
+not there succeeds silently too, so trying it and watching proves nothing. That is why fans are
+the one thing you have to declare: a set is *told* it has them, and a set that says nothing shows
+no fans at all rather than two dead entities.
 
 ## Installing
 
@@ -97,6 +114,36 @@ sets:
 A set that only needs a name can stay written as just that name. The wallwasher is a single bar,
 so its three zones cannot be re-cabled and need no setting.
 
+### 5. Say which sets have fans
+
+The fans are optional and cannot be detected, so a set only gets them when you say it has them:
+
+```yaml
+sets:
+  port_1_2_2:
+    name: Living room
+    fans: true
+```
+
+Two fans then appear on that device, and nothing changes for the sets you left alone. Saying only
+`fans_swapped: true` does not give a set fans — `fans: true` is what does that, so you cannot end
+up with fans nobody asked for.
+
+The fans hang off cables of their own, so like the side speakers they can end up in each other's
+socket, and independently of them. Start the fan called **left fan** and feel which one blows. If
+it is the one on your right, say so:
+
+```yaml
+sets:
+  port_1_2_2:
+    name: Living room
+    fans: true
+    fans_swapped: true
+```
+
+Home Assistant asks for a speed between 1 and 255, which is the whole range the hardware takes.
+Asking for no speed at all stops the fan rather than leaving it crawling.
+
 The plain `amBX` names are handed out in order of identity, so unplugging one set can renumber
 another. Naming a set in the configuration pins it.
 
@@ -106,7 +153,7 @@ set to a different USB socket gives it a new identity: the old one goes unavaila
 after two days, a new unnamed set appears, and the colours do not follow. Keep them in the same
 sockets, or expect to rename after a move.
 
-### 5. Keep it running
+### 6. Keep it running
 
 **macOS**
 
@@ -150,6 +197,8 @@ journalctl --user -u ambx2mqtt -f
 | `the set ... would not open` | another program is holding the USB device, or it needs replugging. The daemon tries again next round |
 | lamps greyed out in Home Assistant | the set was unplugged, or the daemon stopped. Both report offline |
 | lamps gone from Home Assistant | the set has been unseen for two days and was forgotten. Plug it back in and it returns |
+| no fans on a set that has them | the set was never told it has them; add `fans: true` and restart. They cannot be detected |
+| the wrong fan blows | the fans are in each other's socket; add `fans_swapped: true` |
 
 Turn `log_level` up to `debug` in the configuration for more.
 
