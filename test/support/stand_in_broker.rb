@@ -3,12 +3,17 @@
 class StandInBroker
   attr_reader :announcements, :connected_reporting_on
 
-  def initialize
+  def initialize(connected: true)
+    @connected = connected
     @listeners = {}
     @reports = {}
     @listening = false
     @forgotten = []
     @announcements = []
+  end
+
+  def connected?
+    @connected
   end
 
   def connect(reporting_availability_on:)

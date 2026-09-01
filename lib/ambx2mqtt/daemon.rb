@@ -21,7 +21,12 @@ module Ambx2mqtt
       @broker.listen
     end
 
+    # Taking hold of a set means claiming it away from anything else on the
+    # machine. There is no point doing that while there is nowhere to tell Home
+    # Assistant about it, so the sets are left alone until the broker is back.
     def look_around
+      return unless @broker.connected?
+
       @taking_turns.synchronize { look_around_now }
     end
 

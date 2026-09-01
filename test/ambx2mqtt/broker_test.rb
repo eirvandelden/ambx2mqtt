@@ -1,4 +1,5 @@
 require "test_helper"
+require "stringio"
 
 class BrokerTest < Minitest::Test
   def test_reporting_a_lamps_state_keeps_it_on_the_broker_for_home_assistant_to_find
@@ -77,6 +78,19 @@ class BrokerTest < Minitest::Test
 
     assert_equal [ "ambx2mqtt/desk/left/set" ], client.subscribed
   end
+
+  def test_coming_back_with_nothing_to_listen_to_asks_the_broker_for_nothing
+    client = StandInMqttClient.new
+    broker = Ambx2mqtt::Broker.new(client)
+    broker.connect(reporting_availability_on: "ambx2mqtt/availability")
+    client.subscribe_requests.clear
+
+    client.come_back
+
+    assert_empty client.subscribe_requests,
+                 "an empty request went to the broker, which reads as a broken one and gets us dropped"
+  end
+
 
   def test_listening_for_a_lamps_commands_subscribes_to_its_command_topic
     client = StandInMqttClient.new
