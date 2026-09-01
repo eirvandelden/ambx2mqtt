@@ -31,6 +31,10 @@ rescue Ambx2mqtt::CannotStart => error
   abort("ambx2mqtt cannot start: #{error.message}")
 rescue Ambx2mqtt::CannotReadSecret => error
   abort("#{error.message}. Unlock 1Password and try again.")
+rescue SocketError, SystemCallError => error
+  # The service restarts us on its own schedule, which is the right pace to wait
+  # at: a broker can be away for hours and there is nothing to do until it is back.
+  abort("ambx2mqtt cannot reach the broker at #{configuration.broker_host}: #{error.message}")
 rescue Interrupt
   Ambx2mqtt.logger.info("stopping")
 end
