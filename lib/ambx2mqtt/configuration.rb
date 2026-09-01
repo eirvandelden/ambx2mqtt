@@ -49,7 +49,8 @@ module Ambx2mqtt
     def wiring_for(set_identity)
       described = described(set_identity)
 
-      Wiring.new(sides_swapped: described["sides_swapped"], fans: described["fans"])
+      Wiring.new(sides_swapped: described["sides_swapped"], fans: described["fans"],
+                 fans_swapped: described["fans_swapped"])
     end
 
     private

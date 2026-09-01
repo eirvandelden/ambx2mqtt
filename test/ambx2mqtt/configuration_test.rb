@@ -120,6 +120,18 @@ class ConfigurationTest < Minitest::Test
     assert_equal false, configured.wiring_for("desk").fans?
   end
 
+  def test_a_set_can_say_its_fans_are_plugged_in_the_other_way_round
+    configuration = configured(
+      "sets" => { "port_1_2_2" => { "fans" => true, "fans_swapped" => true } }
+    )
+
+    assert configuration.wiring_for("port_1_2_2").fans_swapped?
+  end
+
+  def test_a_set_that_said_nothing_about_its_fans_has_them_the_usual_way_round
+    refute configured("sets" => { "port_1_2_2" => { "fans" => true } }).wiring_for("port_1_2_2").fans_swapped?
+  end
+
   private
 
   def configured(said = {})

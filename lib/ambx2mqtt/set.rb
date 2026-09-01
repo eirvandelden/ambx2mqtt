@@ -41,15 +41,26 @@ module Ambx2mqtt
     def addresses(wiring)
       return LAMP_ADDRESSES unless wiring.sides_swapped?
 
-      LAMP_ADDRESSES.merge("left" => LAMP_ADDRESSES.fetch("right"),
-                           "right" => LAMP_ADDRESSES.fetch("left"))
+      the_other_way_round(LAMP_ADDRESSES, "left", "right")
     end
 
     # The fans are accessories: a set only has them when it was said to.
     def fans_of(wiring)
       return [] unless wiring.fans?
 
-      FAN_ADDRESSES.map { |fan_name, address| Fan.new(name: fan_name, address: address) }
+      fan_addresses(wiring).map { |fan_name, address| Fan.new(name: fan_name, address: address) }
+    end
+
+    # The fans hang off cables of their own, so they can be swapped whichever way
+    # round the speakers happen to be.
+    def fan_addresses(wiring)
+      return FAN_ADDRESSES unless wiring.fans_swapped?
+
+      the_other_way_round(FAN_ADDRESSES, "left fan", "right fan")
+    end
+
+    def the_other_way_round(addresses, left, right)
+      addresses.merge(left => addresses.fetch(right), right => addresses.fetch(left))
     end
   end
 end
