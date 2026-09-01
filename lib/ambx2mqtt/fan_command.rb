@@ -19,6 +19,10 @@ module Ambx2mqtt
       new(on: true, speed: asked.clamp(Fan::SLOWEST, Fan::FASTEST))
     end
 
+    def self.remembered(asked)
+      new(on: asked["state"] == ON, speed: asked["speed"])
+    end
+
     def initialize(on:, speed: nil)
       @on = on
       @speed = speed

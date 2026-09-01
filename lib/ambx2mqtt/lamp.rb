@@ -37,6 +37,10 @@ module Ambx2mqtt
       { topics.state_for(self) => state.to_json }
     end
 
+    def command_from(remembered)
+      LampCommand.new(remembered)
+    end
+
     private
 
     # Off is black on the wire; the colour itself is kept for the next time the

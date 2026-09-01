@@ -25,6 +25,10 @@ module Ambx2mqtt
       @fans = fans_of(wiring)
     end
 
+    def parts
+      lamps + fans
+    end
+
     def carry_out(part, command)
       part.asked_for(command)
       @connection.write(part.command_bytes)

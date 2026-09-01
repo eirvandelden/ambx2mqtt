@@ -47,9 +47,9 @@ module Ambx2mqtt
     end
 
     def put_back
-      @set.lamps.each do |lamp|
-        asked = @memory.for(@identity, lamp.topic_name)
-        carry_out(lamp, LampCommand.new(asked)) if asked
+      @set.parts.each do |part|
+        asked = @memory.for(@identity, part.topic_name)
+        carry_out(part, part.command_from(asked)) if asked
       end
     end
 

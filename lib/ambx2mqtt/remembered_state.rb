@@ -1,23 +1,25 @@
 module Ambx2mqtt
   # What the daemon remembers about each set between runs: when it was last seen,
-  # and what each of its lamps was last asked for. A memory that cannot be read is
+  # and what each of its parts was last asked for. A memory that cannot be read is
   # set aside and the daemon starts fresh.
   class RememberedState
     SET_ASIDE_SUFFIX = ".unreadable".freeze
     LAST_SEEN = "last_seen".freeze
-    LAMPS = "lamps".freeze
+    # The key in the file still says lamps, from before a set could have fans.
+    # Renaming it would throw away every remembered colour for nothing.
+    PARTS = "lamps".freeze
 
     def initialize(path)
       @path = Pathname.new(path)
       @remembered = read
     end
 
-    def for(set_identity, lamp_name)
-      @remembered.dig(set_identity, LAMPS, lamp_name)
+    def for(set_identity, part_name)
+      @remembered.dig(set_identity, PARTS, part_name)
     end
 
-    def remember(set_identity, lamp_name, asked)
-      lamps_of(set_identity)[lamp_name] = asked
+    def remember(set_identity, part_name, asked)
+      parts_of(set_identity)[part_name] = asked
       write
     end
 
@@ -44,8 +46,8 @@ module Ambx2mqtt
       @remembered[set_identity] ||= {}
     end
 
-    def lamps_of(set_identity)
-      about(set_identity)[LAMPS] ||= {}
+    def parts_of(set_identity)
+      about(set_identity)[PARTS] ||= {}
     end
 
     def read

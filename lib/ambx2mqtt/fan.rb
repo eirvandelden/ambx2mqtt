@@ -48,6 +48,10 @@ module Ambx2mqtt
       { topics.state_for(self) => running, topics.speed_state_for(self) => speed.to_s }
     end
 
+    def command_from(remembered)
+      FanCommand.remembered(remembered)
+    end
+
     private
 
     # Stopped is nothing on the wire; the speed itself is kept for the next time
