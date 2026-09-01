@@ -15,7 +15,8 @@ class SetTest < Minitest::Test
 
   def test_a_set_whose_speakers_are_swapped_drives_the_other_socket_for_its_left_lamp
     connection = StandInConnection.new
-    set = Ambx2mqtt::Set.new(identity: "desk", connection: connection, sides_swapped: true)
+    set = Ambx2mqtt::Set.new(identity: "desk", connection: connection,
+                             wiring: Ambx2mqtt::Wiring.new(sides_swapped: true))
 
     set.show(lamp_called("left", set), RED)
 
@@ -24,7 +25,8 @@ class SetTest < Minitest::Test
 
   def test_swapping_the_speakers_leaves_the_wallwasher_alone
     connection = StandInConnection.new
-    set = Ambx2mqtt::Set.new(identity: "desk", connection: connection, sides_swapped: true)
+    set = Ambx2mqtt::Set.new(identity: "desk", connection: connection,
+                             wiring: Ambx2mqtt::Wiring.new(sides_swapped: true))
 
     set.show(lamp_called("wallwasher left", set), RED)
 
@@ -41,6 +43,19 @@ class SetTest < Minitest::Test
     set = Ambx2mqtt::Set.new(identity: "desk", connection: UnpluggedConnection.new)
 
     assert_equal false, set.show(lamp_called("left", set), RED)
+  end
+
+  def test_a_set_nobody_said_has_fans_has_none
+    set = Ambx2mqtt::Set.new(identity: "desk", connection: StandInConnection.new)
+
+    assert_empty set.fans
+  end
+
+  def test_a_set_that_has_fans_has_one_on_each_side
+    set = Ambx2mqtt::Set.new(identity: "desk", connection: StandInConnection.new,
+                             wiring: Ambx2mqtt::Wiring.new(fans: true))
+
+    assert_equal [ "left fan", "right fan" ], set.fans.map(&:name)
   end
 
   private

@@ -51,7 +51,54 @@ class AppearingInHomeAssistantTest < Minitest::Test
     assert_equal "Living room", broker.announcement[:device][:name]
   end
 
+  def test_a_set_nobody_said_has_fans_offers_no_fans_at_all
+    assert_empty announcement[:components].values.select { |part| part[:platform] == "fan" }
+  end
+
+  def test_a_set_that_has_fans_offers_one_for_each_side
+    assert_equal [ "Left fan", "Right fan" ], fans.map { |fan| fan[:name] }
+  end
+
+  def test_every_fan_is_offered_to_home_assistant_as_a_fan
+    assert_equal [ "fan", "fan" ], fans.map { |fan| fan[:platform] }
+  end
+
+  def test_each_fan_takes_its_own_speed
+    left = fans.first
+
+    assert_equal "ambx2mqtt/desk/left_fan/set", left[:command_topic]
+    assert_equal "ambx2mqtt/desk/left_fan/state", left[:state_topic]
+    assert_equal "ambx2mqtt/desk/left_fan/speed/set", left[:percentage_command_topic]
+    assert_equal "ambx2mqtt/desk/left_fan/speed/state", left[:percentage_state_topic]
+  end
+
+  def test_a_fan_speed_is_asked_for_in_the_range_the_hardware_understands
+    assert_equal [ 1, 1 ], fans.map { |fan| fan[:speed_range_min] }
+    assert_equal [ 255, 255 ], fans.map { |fan| fan[:speed_range_max] }
+  end
+
+  def test_each_fan_keeps_its_own_name_across_restarts
+    assert_equal [ "ambx2mqtt_desk_left_fan", "ambx2mqtt_desk_right_fan" ],
+                 fans.map { |fan| fan[:unique_id] }
+  end
+
   private
+
+  def fans
+    with_fans[:components].values.select { |part| part[:platform] == "fan" }
+  end
+
+  def with_fans
+    broker = StandInBroker.new
+    set = Ambx2mqtt::Set.new(identity: "desk", connection: StandInConnection.new,
+                             wiring: Ambx2mqtt::Wiring.new(fans: true))
+
+    Ambx2mqtt::Daemon.new(driver: StandInDriver.new(set), broker: broker,
+                          memory: StandInMemory.new,
+                          clock: StandInClock.new).run
+
+    broker.announcement
+  end
 
   def announcement
     @broker.announcement

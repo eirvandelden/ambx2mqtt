@@ -74,7 +74,7 @@ class ConfigurationTest < Minitest::Test
     configuration = configured("sets" => { "port_1_2_2" => "Living room" })
 
     assert_equal "Living room", configuration.name_for("port_1_2_2")
-    refute configuration.sides_swapped?("port_1_2_2")
+    refute configuration.wiring_for("port_1_2_2").sides_swapped?
   end
 
   def test_a_set_can_say_its_side_speakers_are_plugged_in_the_other_way_round
@@ -83,18 +83,41 @@ class ConfigurationTest < Minitest::Test
     )
 
     assert_equal "Living room", configuration.name_for("port_1_2_2")
-    assert configuration.sides_swapped?("port_1_2_2")
+    assert configuration.wiring_for("port_1_2_2").sides_swapped?
   end
 
   def test_a_set_nobody_has_described_has_its_speakers_the_usual_way_round
-    refute configured.sides_swapped?("port_1_2_2")
+    refute configured.wiring_for("port_1_2_2").sides_swapped?
   end
 
   def test_asking_whether_a_sets_speakers_are_swapped_answers_yes_or_no_and_nothing_else
     configuration = configured("sets" => { "desk" => { "sides_swapped" => "yes please" } })
 
-    assert_equal true, configuration.sides_swapped?("desk")
-    assert_equal false, configured.sides_swapped?("desk")
+    assert_equal true, configuration.wiring_for("desk").sides_swapped?
+    assert_equal false, configured.wiring_for("desk").sides_swapped?
+  end
+
+  def test_a_set_can_say_it_has_fans
+    configuration = configured(
+      "sets" => { "port_1_2_2" => { "name" => "Living room", "fans" => true } }
+    )
+
+    assert configuration.wiring_for("port_1_2_2").fans?
+  end
+
+  def test_a_set_nobody_has_described_has_no_fans
+    refute configured.wiring_for("port_1_2_2").fans?
+  end
+
+  def test_a_set_written_as_just_a_name_has_no_fans
+    refute configured("sets" => { "port_1_2_2" => "Living room" }).wiring_for("port_1_2_2").fans?
+  end
+
+  def test_asking_whether_a_set_has_fans_answers_yes_or_no_and_nothing_else
+    configuration = configured("sets" => { "desk" => { "fans" => "yes please" } })
+
+    assert_equal true, configuration.wiring_for("desk").fans?
+    assert_equal false, configured.wiring_for("desk").fans?
   end
 
   private
