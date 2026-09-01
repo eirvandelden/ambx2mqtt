@@ -1,10 +1,11 @@
 # Stands in for the MQTT gem's client, recording what the broker asked it to do.
 class StandInMqttClient
-  attr_reader :published, :subscribed, :will, :connected
+  attr_reader :published, :subscribed, :will, :connected, :subscribe_requests
 
   def initialize(arriving: [], refusing_to_subscribe: false)
     @published = []
     @subscribed = []
+    @subscribe_requests = []
     @arriving = arriving
     @refusing_to_subscribe = refusing_to_subscribe
   end
@@ -29,9 +30,12 @@ class StandInMqttClient
     @came_back&.call
   end
 
+  # The real client sends a packet whatever it is given, and one with no topics
+  # in it is a broken request that gets us dropped.
   def subscribe(*topics)
     raise "not connected" if @refusing_to_subscribe && @subscribed.any?
 
+    @subscribe_requests << topics
     @subscribed.concat(topics)
     interrupting = @while_subscribing
     @while_subscribing = nil
