@@ -1,5 +1,6 @@
 module Ambx2mqtt
-  # One physical amBX set: five lamps sharing a single USB connection.
+  # One physical amBX set: five lamps, and up to two fans, sharing a single USB
+  # connection.
   class Set
     LAMP_ADDRESSES = {
       "left" => 0x0B,
@@ -24,9 +25,9 @@ module Ambx2mqtt
       @fans = fans_of(wiring)
     end
 
-    def show(lamp, command)
-      lamp.asked_for(command)
-      @connection.write(lamp.command_bytes)
+    def carry_out(part, command)
+      part.asked_for(command)
+      @connection.write(part.command_bytes)
     end
 
     private

@@ -72,7 +72,7 @@ class AmbxDriverTest < Minitest::Test
     ))
     set = driver.attached_sets.first
 
-    set.show(set.lamps.find { |lamp| lamp.name == "left" }, RED_AT_FULL)
+    set.carry_out(set.lamps.find { |lamp| lamp.name == "left" }, RED_AT_FULL)
 
     assert_equal [ 0xA1, 0x1B, 0x03, 255, 0, 0 ], re_cabled.written.last
   end

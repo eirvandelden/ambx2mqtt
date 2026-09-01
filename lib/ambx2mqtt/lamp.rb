@@ -33,6 +33,10 @@ module Ambx2mqtt
       { "state" => @on ? ON : OFF, "brightness" => @brightness, "color" => @colour.to_home_assistant }
     end
 
+    def reports(topics)
+      { topics.state_for(self) => state.to_json }
+    end
+
     private
 
     # Off is black on the wire; the colour itself is kept for the next time the

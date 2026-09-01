@@ -49,37 +49,47 @@ module Ambx2mqtt
     def put_back
       @set.lamps.each do |lamp|
         asked = @memory.for(@identity, lamp.topic_name)
-        show(lamp, LampCommand.new(asked)) if asked
+        carry_out(lamp, LampCommand.new(asked)) if asked
       end
     end
 
     def take_commands
-      @set.lamps.each do |lamp|
-        @broker.on_command(@topics.command_for(lamp)) do |payload|
-          @taking_turns.synchronize { obey(lamp, payload) }
-        end
+      @set.lamps.each { |lamp| listen(lamp, @topics.command_for(lamp)) { |said| LampCommand.parse(said) } }
+      @set.fans.each { |fan| take_fan_commands(fan) }
+    end
+
+    # A fan is told whether to run on one topic and how fast on another, because
+    # Home Assistant has no single JSON command for a fan the way it has for a
+    # light.
+    def take_fan_commands(fan)
+      listen(fan, @topics.command_for(fan)) { |said| FanCommand.switching(said) }
+      listen(fan, @topics.speed_command_for(fan)) { |said| FanCommand.at_speed(said) }
+    end
+
+    def listen(part, topic, &read)
+      @broker.on_command(topic) do |payload|
+        @taking_turns.synchronize { obey(part, read.call(payload), payload) }
       end
     end
 
-    def obey(lamp, payload)
-      command = LampCommand.parse(payload)
-      return ignore(lamp, payload) unless command
+    def obey(part, command, payload)
+      return ignore(part, payload) unless command
 
-      show(lamp, command)
-      @memory.remember(@identity, lamp.topic_name, lamp.state)
+      carry_out(part, command)
+      @memory.remember(@identity, part.topic_name, part.state)
     end
 
     # A command nobody can read says nothing about whether the set is reachable.
-    def ignore(lamp, payload)
-      Ambx2mqtt.logger.warn("ignoring a command for #{@identity} #{lamp.name} that makes no sense: #{payload}")
+    def ignore(part, payload)
+      Ambx2mqtt.logger.warn("ignoring a command for #{@identity} #{part.name} that makes no sense: #{payload}")
     end
 
     # A set can be unplugged between one command and the next. However the driver
     # says so, it must not take the daemon down: the set is simply lost, and the
     # others carry on.
-    def show(lamp, command)
-      reached = @set.show(lamp, command)
-      @broker.report(@topics.state_for(lamp), lamp.state.to_json)
+    def carry_out(part, command)
+      reached = @set.carry_out(part, command)
+      part.reports(@topics).each { |topic, said| @broker.report(topic, said) }
       leave unless reached
     rescue StandardError => error
       Ambx2mqtt.logger.warn("could not reach the set #{@identity}: #{error.message}")

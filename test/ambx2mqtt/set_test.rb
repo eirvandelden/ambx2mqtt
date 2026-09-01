@@ -8,7 +8,7 @@ class SetTest < Minitest::Test
     connection = StandInConnection.new
     set = Ambx2mqtt::Set.new(identity: "desk", connection: connection)
 
-    set.show(lamp_called("left", set), RED)
+    set.carry_out(lamp_called("left", set), RED)
 
     assert_equal [ 0xA1, 0x0B, 0x03, 255, 0, 0 ], connection.commands.last
   end
@@ -18,7 +18,7 @@ class SetTest < Minitest::Test
     set = Ambx2mqtt::Set.new(identity: "desk", connection: connection,
                              wiring: Ambx2mqtt::Wiring.new(sides_swapped: true))
 
-    set.show(lamp_called("left", set), RED)
+    set.carry_out(lamp_called("left", set), RED)
 
     assert_equal [ 0xA1, 0x1B, 0x03, 255, 0, 0 ], connection.commands.last
   end
@@ -28,7 +28,7 @@ class SetTest < Minitest::Test
     set = Ambx2mqtt::Set.new(identity: "desk", connection: connection,
                              wiring: Ambx2mqtt::Wiring.new(sides_swapped: true))
 
-    set.show(lamp_called("wallwasher left", set), RED)
+    set.carry_out(lamp_called("wallwasher left", set), RED)
 
     assert_equal [ 0xA1, 0x2B, 0x03, 255, 0, 0 ], connection.commands.last
   end
@@ -36,13 +36,13 @@ class SetTest < Minitest::Test
   def test_a_set_that_took_the_command_says_so
     set = Ambx2mqtt::Set.new(identity: "desk", connection: StandInConnection.new)
 
-    assert_equal true, set.show(lamp_called("left", set), RED)
+    assert_equal true, set.carry_out(lamp_called("left", set), RED)
   end
 
   def test_a_set_that_has_gone_says_the_command_did_not_land
     set = Ambx2mqtt::Set.new(identity: "desk", connection: UnpluggedConnection.new)
 
-    assert_equal false, set.show(lamp_called("left", set), RED)
+    assert_equal false, set.carry_out(lamp_called("left", set), RED)
   end
 
   def test_a_set_nobody_said_has_fans_has_none
