@@ -16,6 +16,10 @@ class StandInBroker
     @connected
   end
 
+  def answer_again
+    @connected = true
+  end
+
   def connect(reporting_availability_on:)
     @connected_reporting_on = reporting_availability_on
   end
