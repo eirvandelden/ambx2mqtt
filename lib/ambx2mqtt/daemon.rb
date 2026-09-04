@@ -21,11 +21,33 @@ module Ambx2mqtt
       @broker.listen
     end
 
+    # Taking hold of a set means claiming it away from anything else on the
+    # machine. There is no point doing that while there is nowhere to tell Home
+    # Assistant about it, so the sets are left alone until the broker is back.
     def look_around
+      return wait_for_the_broker unless @broker.connected?
+
+      stop_waiting
       @taking_turns.synchronize { look_around_now }
     end
 
     private
+
+    # Said once rather than every round: a broker can be away for hours, and the
+    # point is that the log shows the daemon knew, not that it fills up.
+    def wait_for_the_broker
+      return if @waiting
+
+      @waiting = true
+      Ambx2mqtt.logger.warn("waiting for the broker; leaving the sets alone until it answers")
+    end
+
+    def stop_waiting
+      return unless @waiting
+
+      @waiting = false
+      Ambx2mqtt.logger.info("the broker answered; looking for sets again")
+    end
 
     def look_around_now
       attached = @driver.attached_sets

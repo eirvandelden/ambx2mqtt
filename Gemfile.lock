@@ -1,3 +1,10 @@
+GIT
+  remote: https://github.com/eirvandelden/libamBX.git
+  revision: cceb0077ce210ed61fdd36593de048b003a9ad36
+  specs:
+    libambx (0.4.0)
+      libusb
+
 GEM
   remote: https://gem.coop/
   specs:
@@ -23,12 +30,18 @@ GEM
     concurrent-ruby (1.3.8)
     connection_pool (3.0.2)
     drb (2.2.3)
+    ffi (1.17.4)
+    ffi (1.17.4-arm64-darwin)
     i18n (1.15.2)
       concurrent-ruby (~> 1.0)
     json (2.21.2)
     language_server-protocol (3.17.0.6)
+    libusb (0.8.0)
+      ffi (~> 1.0)
+      mini_portile2 (~> 2.1)
     lint_roller (1.1.0)
     logger (1.7.0)
+    mini_portile2 (2.8.9)
     minitest (6.0.6)
       drb (~> 2.0)
       prism (~> 1.5)
@@ -89,6 +102,7 @@ PLATFORMS
 
 DEPENDENCIES
   bundler-audit
+  libambx!
   minitest
   mqtt-ccutrer
   rake
@@ -104,11 +118,16 @@ CHECKSUMS
   concurrent-ruby (1.3.8) sha256=b2f1be836e968ccc78ccfce277ea79c72a88633f22306782c16ff23fb415d1e1
   connection_pool (3.0.2) sha256=33fff5ba71a12d2aa26cb72b1db8bba2a1a01823559fb01d29eb74c286e62e0a
   drb (2.2.3) sha256=0b00d6fdb50995fe4a45dea13663493c841112e4068656854646f418fda13373
+  ffi (1.17.4) sha256=bcd1642e06f0d16fc9e09ac6d49c3a7298b9789bcb58127302f934e437d60acf
+  ffi (1.17.4-arm64-darwin) sha256=19071aaf1419251b0a46852abf960e77330a3b334d13a4ab51d58b31a937001b
   i18n (1.15.2) sha256=00f9eb62412fe593b2a65a97daa75300d37abb8f7202ec748e94b6d46a9dd1b5
   json (2.21.2) sha256=1f1d3b7cf2b3ba1a69beca0bb6db13d5438b80bff3cd54cdaaa620b9b07c1c6a
   language_server-protocol (3.17.0.6) sha256=5ef2c0c138f8267e1bc631d3328347d354f96724b0af22f2c79516120443b7f0
+  libambx (0.4.0)
+  libusb (0.8.0) sha256=993800ad5437f1dbe724827a6b0453ca328dbc5f4c91b4b8567696d9ef2b0ac0
   lint_roller (1.1.0) sha256=2c0c845b632a7d172cb849cc90c1bce937a28c5c8ccccb50dfd46a485003cc87
   logger (1.7.0) sha256=196edec7cc44b66cfb40f9755ce11b392f21f7967696af15d274dde7edff0203
+  mini_portile2 (2.8.9) sha256=0cd7c7f824e010c072e33f68bc02d85a00aeb6fce05bb4819c03dfd3c140c289
   minitest (6.0.6) sha256=153ea36d1d987a62942382b61075745042a2b3123b1cd48f4c3675af9cc7d6f1
   mqtt-ccutrer (1.1.2) sha256=dbe8bd75f647c83a871c4a501f2f953d62603479f1ce46f6480568b2cd6c4458
   parallel (2.1.0) sha256=b35258865c2e31134c5ecb708beaaf6772adf9d5efae28e93e99260877b09356

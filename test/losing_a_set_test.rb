@@ -144,6 +144,16 @@ class LosingASetTest < Minitest::Test
                  "the daemon keeps announcing a set it cannot reach"
   end
 
+  def test_a_daemon_that_cannot_reach_the_broker_leaves_the_sets_alone
+    broker = StandInBroker.new(connected: false)
+    driver = StandInDriver.new(Ambx2mqtt::Set.new(identity: "desk", connection: @connection))
+
+    Ambx2mqtt::Daemon.new(driver: driver, broker: broker, memory: @memory, clock: @clock).look_around
+
+    assert_nil driver.times_asked,
+               "the daemon took hold of the sets while it had nowhere to tell anyone about them"
+  end
+
   private
 
   def daemon_over(set)

@@ -4,7 +4,11 @@ class StandInDriver
     @sets = sets
   end
 
+  attr_reader :times_asked
+
   def attached_sets
+    @times_asked = @times_asked.to_i + 1
+
     @sets.dup
   end
 

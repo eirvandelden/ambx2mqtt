@@ -11,4 +11,21 @@ class InstallationTest < Minitest::Test
 
     assert_instance_of Ambx2mqtt::Daemon, installation.daemon
   end
+
+  def test_a_broker_that_is_away_a_long_while_is_still_waited_for
+    assert_nil installation.client.reconnect_limit,
+               "the daemon gives up on the broker, so a long sleep is never recovered from"
+  end
+
+  private
+
+  def installation
+    Ambx2mqtt::Installation.new(
+      Ambx2mqtt::Configuration.new(
+        "broker" => { "host" => "mqtt.home.arpa", "username" => "ambx2mqtt", "password" => "hunter2" },
+        "state_file" => "/tmp/ambx2mqtt-test-state.json"
+      ),
+      controllers: StandInControllers.new
+    )
+  end
 end
