@@ -32,17 +32,41 @@ hours of starting.
 
 Two different failures, in this order.
 
-**First, discovery dies quietly.** Every scan starts failing and never recovers:
+**First, discovery starts failing in long stretches.** Every scan fails while it lasts:
 
 ```
 E, [2026-08-31T14:34:22] ERROR -- : this round went wrong, carrying on: LIBUSB::ERROR_OTHER in libusb_init
 E, [2026-08-31T14:34:52] ERROR -- : this round went wrong, carrying on: LIBUSB::ERROR_OTHER in libusb_init
 ```
 
-43 of those in the daemon's log, one per scan, from about 78 minutes after it started until it was
-restarted. The daemon stayed up the whole time — it survives a failed scan on purpose — but it
-could no longer find a single set. Anything already plugged in stayed working; nothing new was ever
-noticed. Only a restart put it right.
+The daemon stays up throughout — it survives a failed scan on purpose — but while it lasts it
+cannot find a single set. Anything already plugged in keeps working; nothing new is ever noticed.
+
+**It comes back on its own, and then goes again.** One daemon left running for six days shows the
+two states alternating, blind for a few hours at a time and then finding sets again with nothing
+restarted:
+
+```
+2026-09-02 11:32  found a set
+2026-09-02 13:38  blind          (about two hours in)
+2026-09-03 11:47  found a set    <- recovered on its own
+2026-09-03 18:43  blind
+2026-09-04 08:46  found a set
+2026-09-04 13:45  blind
+2026-09-07 09:07  found a set
+2026-09-07 14:57  blind
+```
+
+1832 failed scans over those six days. The recovery is garbage collection: it finalises enough of
+the leaked contexts that `libusb_init` can succeed again, which is the same effect as the file
+descriptor count dropping from 807 back to 75 partway through the reproduction below. So the leak
+does not simply stop discovery dead — it makes it unreliable for hours at a time, which is harder
+to notice and harder to explain to whoever is using it.
+
+An earlier version of this handoff said discovery "never recovers" and that "only a restart put it
+right". That was true of the one process first examined, which happened to fail 309 times in a row,
+but it is wrong as a general description. Corrected here so nobody goes looking for a fault that
+makes the failure permanent.
 
 **Then the process aborts.** Left running long enough it does not raise, it dies:
 
@@ -155,6 +179,7 @@ Then the reproduction above: 2000 calls should leave file descriptors flat and t
 
 ## Where the numbers came from
 
-Every figure above was measured on 31 August 2026 against `libambx` at commit `cceb007` (version
-`0.4.0`) as bundled into `ambx2mqtt`, on macOS 26.6.2 with Ruby 4.0.6 and libusb gem 0.8.0. The
-daemon log quoted is `~/Library/Logs/ambx2mqtt.log`.
+Every figure above was measured against `libambx` at commit `cceb007` (version `0.4.0`) as bundled
+into `ambx2mqtt`, on macOS 26.6.2 with Ruby 4.0.6 and libusb gem 0.8.0. The reproduction and the
+descriptor counts are from 31 August 2026; the six-day alternating record is from 2 to 8 September
+2026. The daemon log quoted is `~/Library/Logs/ambx2mqtt.log`.
