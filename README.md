@@ -28,7 +28,8 @@ A set may also have two **fans**, which are optional accessories rather than par
 | right fan | beside the screen, on the right |
 
 Each fan takes on/off and a speed, and remembers the speed it was last asked for. A fan started
-again comes back at the speed it had.
+again comes back at the speed it had. One nobody has given a speed yet starts at its slowest: a
+room full of air is a rude surprise where a bright lamp is not.
 
 The hardware cannot be read back, so what Home Assistant shows is always *what was last asked
 for*, never a reading from the lamp itself.
@@ -142,7 +143,8 @@ sets:
 ```
 
 Home Assistant asks for a speed between 1 and 255, which is the whole range the hardware takes.
-Asking for no speed at all stops the fan rather than leaving it crawling.
+Asking for no speed at all stops the fan rather than leaving it crawling, and asking for more than
+it has blows it as fast as it can.
 
 The plain `amBX` names are handed out in order of identity, so unplugging one set can renumber
 another. Naming a set in the configuration pins it.

@@ -1,7 +1,9 @@
 module Ambx2mqtt
   # One of the two fans an amBX set may have. Optional accessories: a set only
   # has them when it was said to. A fan is asked for a speed rather than a
-  # colour, and remembers the speed it was last asked for.
+  # colour, and remembers the speed it was last asked for. One nobody has given a
+  # speed yet starts at its slowest, because a room full of air is a rude
+  # surprise where a bright lamp is not.
   class Fan
     PACKET_HEADER = 0xA1
 
@@ -19,7 +21,7 @@ module Ambx2mqtt
     def initialize(name:, address:)
       @name = name
       @address = address
-      @speed = FASTEST
+      @speed = SLOWEST
       @on = false
     end
 

@@ -17,10 +17,10 @@ class BlowingAFanTest < Minitest::Test
                           clock: StandInClock.new).run
   end
 
-  def test_starting_a_fan_sets_it_blowing_at_full_speed
+  def test_starting_a_fan_nobody_has_given_a_speed_yet_barely_blows
     @broker.deliver(COMMAND_TOPIC, "ON")
 
-    assert_equal [ [ 0xA1, 0x5B, 0x03, 0, 0, 255 ] ], @connection.commands
+    assert_equal [ [ 0xA1, 0x5B, 0x03, 0, 0, 1 ] ], @connection.commands
   end
 
   def test_stopping_a_fan_stills_it
@@ -45,7 +45,7 @@ class BlowingAFanTest < Minitest::Test
   def test_the_right_fan_is_driven_apart_from_the_left_one
     @broker.deliver("ambx2mqtt/desk/right_fan/set", "ON")
 
-    assert_equal [ [ 0xA1, 0x6B, 0x03, 0, 0, 255 ] ], @connection.commands
+    assert_equal [ [ 0xA1, 0x6B, 0x03, 0, 0, 1 ] ], @connection.commands
   end
 
   def test_a_command_a_fan_cannot_read_leaves_it_alone
@@ -79,6 +79,20 @@ class BlowingAFanTest < Minitest::Test
     @broker.deliver(COMMAND_TOPIC, "ON")
 
     assert_equal [ 0xA1, 0x5B, 0x03, 0, 0, 128 ], @connection.commands.last
+  end
+
+  def test_a_fan_asked_for_more_speed_than_it_has_blows_as_fast_as_it_can
+    @broker.deliver(SPEED_COMMAND_TOPIC, "300")
+
+    assert_equal [ [ 0xA1, 0x5B, 0x03, 0, 0, 255 ] ], @connection.commands
+    assert_equal "255", @broker.reported(SPEED_STATE_TOPIC)
+  end
+
+  def test_a_fan_asked_for_less_than_no_speed_stops
+    @broker.deliver(SPEED_COMMAND_TOPIC, "-5")
+
+    assert_equal [ [ 0xA1, 0x5B, 0x03, 0, 0, 0 ] ], @connection.commands
+    assert_equal "OFF", @broker.reported(STATE_TOPIC)
   end
 
   def test_a_speed_that_is_not_a_number_leaves_the_fan_alone
