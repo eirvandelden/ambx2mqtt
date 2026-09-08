@@ -85,7 +85,7 @@ class AppearingInHomeAssistantTest < Minitest::Test
   private
 
   def fans
-    with_fans[:components].values.select { |part| part[:platform] == "fan" }
+    @fans ||= with_fans[:components].values.select { |part| part[:platform] == "fan" }
   end
 
   def with_fans

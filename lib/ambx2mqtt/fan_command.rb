@@ -16,19 +16,19 @@ module Ambx2mqtt
       return unless asked
       return new(on: false) if asked <= Fan::STILL
 
-      new(on: true, speed: asked.clamp(Fan::SLOWEST, Fan::FASTEST))
+      new(on: true, speed: [ asked, Fan::FASTEST ].min)
     end
 
     def self.remembered(asked)
       new(on: asked["state"] == ON, speed: asked["speed"])
     end
 
+    attr_reader :speed
+
     def initialize(on:, speed: nil)
       @on = on
       @speed = speed
     end
-
-    attr_reader :speed
 
     def on?
       @on
