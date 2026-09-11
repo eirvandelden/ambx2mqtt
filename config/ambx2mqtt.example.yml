@@ -32,8 +32,18 @@ log_level: info
 # each other's socket. A set that is wired that way says so, and then "left"
 # means the speaker actually on your left. Write a set as a block when it needs
 # more than a name.
+#
+# The fans are optional accessories and the controller cannot be asked what is
+# attached to it, so a set only gets its two fans when it says it has them. A
+# set that says nothing shows no fans at all. The fans are on cables of their
+# own, so they have their own setting for being swapped: fans: true is what
+# gives a set fans, whether or not they are the other way round.
 sets:
   serial_AB12CD34: Living room
   port_1_2_3:
     name: Study
     sides_swapped: true
+  port_1_2_2:
+    name: Games room
+    fans: true
+    fans_swapped: true

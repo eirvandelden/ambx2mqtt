@@ -46,8 +46,11 @@ module Ambx2mqtt
       described(set_identity)["name"]
     end
 
-    def sides_swapped?(set_identity)
-      described(set_identity)["sides_swapped"] ? true : false
+    def wiring_for(set_identity)
+      described = described(set_identity)
+
+      Wiring.new(sides_swapped: described["sides_swapped"], fans: described["fans"],
+                 fans_swapped: described["fans_swapped"])
     end
 
     private
