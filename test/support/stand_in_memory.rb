@@ -1,4 +1,4 @@
-# Stands in for the memory of what each lamp was last asked for, without
+# Stands in for the memory of what each part of a set was last asked for, without
 # touching the disk.
 class StandInMemory
   def initialize(remembered = {})
@@ -19,11 +19,11 @@ class StandInMemory
     @last_seen.delete(set_identity)
   end
 
-  def for(set_identity, lamp_name)
-    @remembered.dig(set_identity, lamp_name)
+  def for(set_identity, part_name)
+    @remembered.dig(set_identity, part_name)
   end
 
-  def remember(set_identity, lamp_name, asked)
-    (@remembered[set_identity] ||= {})[lamp_name] = asked
+  def remember(set_identity, part_name, asked)
+    (@remembered[set_identity] ||= {})[part_name] = asked
   end
 end

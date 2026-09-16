@@ -65,7 +65,7 @@ module Ambx2mqtt
 
       @sets[identity] = Set.new(identity: identity, connection: controller,
                                 name: @configuration.name_for(identity) || plain_name(position),
-                                sides_swapped: @configuration.sides_swapped?(identity))
+                                wiring: @configuration.wiring_for(identity))
     end
 
     # A set nobody has named is called after what it is, numbered from the

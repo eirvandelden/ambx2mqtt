@@ -24,7 +24,7 @@ module Ambx2mqtt
         origin: { name: NAME },
         availability: [ { topic: Topics.daemon_availability }, { topic: @topics.availability } ],
         availability_mode: BOTH_MUST_BE_HERE,
-        components: @set.lamps.to_h { |lamp| [ lamp.topic_name, lamp_component(lamp) ] }
+        components: components
       }
     end
 
@@ -32,6 +32,12 @@ module Ambx2mqtt
 
     def device_id
       self.class.device_id(@set.identity)
+    end
+
+    def components
+      lamps = @set.lamps.to_h { |lamp| [ lamp.topic_name, lamp_component(lamp) ] }
+
+      lamps.merge(@set.fans.to_h { |fan| [ fan.topic_name, fan_component(fan) ] })
     end
 
     def lamp_component(lamp)
@@ -44,6 +50,22 @@ module Ambx2mqtt
         state_topic: @topics.state_for(lamp),
         supported_color_modes: [ COLOUR_MODE ],
         brightness: true
+      }
+    end
+
+    # A fan has no JSON schema to lean on the way a light does, so its speed
+    # arrives on a topic of its own, as a plain number in the hardware's range.
+    def fan_component(fan)
+      {
+        platform: "fan",
+        name: fan.name.capitalize,
+        unique_id: "#{device_id}_#{fan.topic_name}",
+        command_topic: @topics.command_for(fan),
+        state_topic: @topics.state_for(fan),
+        percentage_command_topic: @topics.speed_command_for(fan),
+        percentage_state_topic: @topics.speed_state_for(fan),
+        speed_range_min: Fan::SLOWEST,
+        speed_range_max: Fan::FASTEST
       }
     end
   end
