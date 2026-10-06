@@ -1,6 +1,6 @@
 GIT
   remote: https://github.com/eirvandelden/libamBX.git
-  revision: 3c8eef64d40961271be0db1f6182cfad9085b00d
+  revision: a437acbad57bcaae2669d427dfaa922c35ef58a1
   specs:
     libambx (0.4.1)
       libusb
